@@ -9,7 +9,7 @@ Lo que tengo hecho hasta ahora en getmarket, es:
 
 una funcion gnGetSTXData(a,b) que va Bittrex y le pide los valores de cambio de la moneda 'a' a moneda 'b'. te devuelve un vector que tiene: (fecha del request, bidrate, ask rate). la fecha del request queda en formato unix epoch. los valores Ask y Bid son los valores de venta y compra del mercado. Bid es el menor, al que vendes y ask es el mayor, al que compras.
 
-una funcion fnDetectCue(a), donde 'a' es una lista con los valores del Awesome Oscilator. Esta usa los ultimos 3 valores de la lista AO para detectar pistas y decidir cuando comprar o vender, segun la estrategia de momentum del Bill Williams, que es la que he estado usando manualmente desde febrero con buenos resultados.
+una funcion fnDetectCue(a), donde 'a' es una lista con los valores del Awesome Oscilator. Esta usa los ultimos 3 valores de la lista AO para detectar pistas y decidir cuando comprar o vender, segun la estrategia de momentum del Bill Williams, que es la que he estado usando manualmente desde febrero con buenos resultados (subi un excel con un simulador visual, apretas F9 y genera charts randomizados, mostrando el oscilador y donde ocurren los cues).
 
 las siguientes dos funciones son para probar como anda la estregia y comprar o vender localmente con plata falsa definida localmente.
 
