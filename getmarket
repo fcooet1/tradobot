@@ -7,11 +7,10 @@ import requests,json,time,datetime,sys
 
 def fnGetSTXData(a, b):
 	r=requests.get('https://api.bittrex.com/v3/markets/'+a+'-'+b+'/ticker')
-	#rtime=time.mktime(time.strptime(r.headers['Date'][5:-4], '%d %b %Y %H:%M:%S'))
 	l=float(r.json()['bidRate'])
 	h=float(r.json()['askRate'])
 
-	return([0, l, h]) #busca una forma de registar unix epoch en el primer indice
+	return([int(time.time(), l, h])
 
 def fnDetectCue(a):
 	#Nough cross
