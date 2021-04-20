@@ -67,7 +67,7 @@ print('Press Ctrl+C to stop the bot and recover your BTC at current market price
 
 while len(btc_eth)<34:
 		btc_eth.append(fnGetSTXData('ETH', 'BTC'))
-		sys.stdout.write("\rInitializing %" +str(round(100*len(btc_eth)/34)))
+		sys.stdout.write("\rInitializing " +str(round(100*len(btc_eth)/34))+'%')
 		sys.stdout.flush()
 print()
 print()
