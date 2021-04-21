@@ -23,10 +23,10 @@ def fnDetectCue(a):
 			return 1
 	#Saucers
 	if len(a)>2:
-		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2]:
+		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2] and a[-4]>a[-3]:
 			#Saucer Cue: Buy
 			return 0 
-		if a[-1]<0 and a[-2]<0 and a[-3]<0 and a[-1]<a[-2] and a[-3]<a[-2]:
+		if a[-1]<0 and a[-2]<0 and a[-3]<0 and a[-1]<a[-2] and a[-3]<a[-2] and a[-4]<a[-3]:
 			#Saucer Cue: Sell
 			return 1
 	else:
