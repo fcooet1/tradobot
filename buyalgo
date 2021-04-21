@@ -18,6 +18,7 @@ qtytot=0
 lastqty=0
 while bcash > askqty[mindx]*askrate[mindx]:
 	fee=askqty[mindx]*askrate[mindx]*.0075
+	#aqui va codigo que manda el put request al server
 	print(str(askqty[mindx])+' lot bought for $'+str(askqty[mindx]*askrate[mindx])+', fee='+str(fee))
 	bcash-=askqty[mindx]*askrate[mindx]+fee
 	print(str(bcash) +' remaining')
@@ -26,8 +27,7 @@ while bcash > askqty[mindx]*askrate[mindx]:
 	askrate.pop(mindx)
 	askqty.pop(mindx)
 	mindx=askrate.index(min(askrate))
-
-print('fuera while')
+	
 print()
 fee=bcash*.0075
 lastqty=(bcash-fee)/(askrate[mindx])
