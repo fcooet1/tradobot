@@ -24,38 +24,42 @@ def fnDetectCue(a):
 			return 1
 	#Saucers
 	if len(a)>2:
-		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2] and a[-3]<a[-4]:
+		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2] and a[-4]>a[-3]:
 			#Saucer Cue: Buy
 			return 0 
-		if a[-1]<0 and a[-2]<0 and a[-3]<0 and a[-1]<a[-2] and a[-3]<a[-2] and a[-3]>a[-4]:
+		if a[-1]<0 and a[-2]<0 and a[-3]<0 and a[-1]<a[-2] and a[-3]<a[-2] and a[-4]<a[-3]:
 			#Saucer Cue: Sell
 			return 1
 	else:
 		return 2
 
 def fnBuyETH(m, p):
-	#m=money used p=price of good g=good recieved
-	g=m/p
+	fee= m*.0075
+	g=(m-fee)/p
 	print('*****************************************************')
-	print("ETH"+str(g)+" bought for $"+str(p))
+	print("ETH%.6f bought for $%.6f"%(g, p))
+	print('$%.5f fee paid'%fee)
 	return g
 
 def fnSellETH(g,p):
-	#m=money recieved p=price of good g=good to sell
-	m=g*p
+	fee=g*.0075
+	m=(g-fee)*p
 	print('*****************************************************')
-	print("ETH"+str(g)+" sold for $"+str(p))
+	print("ETH%.6f bought for $%.6f"%(g, p))
+	print('$%.5f fee paid'%fee)
 	return m
 
 ##################################################
 #######       Program Inizialization       #######
 ##################################################
 
-btc_eth=[]
+pricelist=[]
 mid=[]
 SMA5=[]
 SMA34=[]
 AO=[]
+coina='ETH'
+coinb='BTC'
 print('TRADOBOT v0.1 - Automatic ETH-BTC trading on Bittrex Market by FO')
 print('This bot uses Bill Williams AO Momentum strategy to trade automatically')
 print('Input BTC amount to start trading')
@@ -63,13 +67,23 @@ BTCcash=float(input())
 startingpoint=BTCcash
 ETHcash=0.0
 LastPrice=0.0
+sessionfees=[]
 print('Press Ctrl+C to stop the bot and recover your BTC at current market price')
 
-
-while len(btc_eth)<34:
-		btc_eth.append(fnGetSTXData('ETH', 'BTC'))
-		sys.stdout.write("\rInitializing %" +str(round(100*len(btc_eth)/34)))
-		sys.stdout.flush()
+r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
+rj=r.json()
+for tik in rj:
+	rjt=[int(time.time()),float(tik['low']),float(tik['high'])]
+	pricelist.append(rjt)
+	mid.append((pricelist[-1][2]+pricelist[-1][1]/2))
+	if len(mid)>=5:
+			SMA5.append(sum(mid[-5:])/5)
+	if len(mid)>=34:
+			SMA34.append(sum(mid[-34:])/34)
+			AO.append(SMA5[-1]-SMA34[-1])
+	sys.stdout.write("\rInitializing " +str(round(100*len(pricelist)/len(rj)))+'%')
+	sys.stdout.flush()
+		
 print()
 print()
 print("Waiting for Cues")
@@ -84,46 +98,43 @@ print(btc_eth)
 
 try:
 	while True:
-		btc_eth.append(fnGetSTXData('ETH', 'BTC'))
-		mid.append((btc_eth[-1][2]+btc_eth[-1][1]/2))
-		if len(btc_eth)>=5:
-			SMA5.append(sum(mid[-5:])/5)
-			
-		if len(btc_eth)>=34:
-			SMA34.append(sum(mid[-34:])/34)
-			AO.append(SMA5[-1]-SMA34[-1])
+		pricelist.append(fnGetSTXData(coina, coinb))
+		mid.append((pricelist[-1][2]+pricelist[-1][1]/2))
+		SMA5.append(sum(mid[-5:])/5)
+		SMA34.append(sum(mid[-34:])/34)
+		AO.append(SMA5[-1]-SMA34[-1])
 		aux=fnDetectCue(AO)
 	
 		if aux==1:
-			#print('Price: L$'+str(btc_eth[-1][1])+' Price: H$'+str(btc_eth[-1][2]))#Sellprice
-			#print()
-			if LastPrice<btc_eth[-1][1] and ETHcash>0:
-				BTCcash=fnSellETH(ETHcash,btc_eth[-1][1])
+			#Sell
+			if LastPrice/(1-.0075)**2<pricelist[-1][1] and ETHcash>0:
+				BTCcash=fnSellETH(ETHcash,pricelist[-1][1])
+				sessionfees.append(0.0075*ETHcash)
 				ETHcash=0.0
 				LastPrice=999999999999.9
-				print("Current BTC balance is $"+str(BTCcash))
-				print()
-				
+				print("Current BTC balance is $%.6f" %BTCcash)
+				print()	
 		if aux==0:
-			#print('Price: L$'+str(btc_eth[-1][1])+' Price: H$'+str(btc_eth[-1][2]))#Buyprice
-			#print()
+			#Buy
 			if BTCcash>0:
-				ETHcash=fnBuyETH(BTCcash,btc_eth[-1][2])
+				ETHcash=fnBuyETH(BTCcash,pricelist[-1][2])
+				sessionfees.append(0.0075*ETHcash)
 				BTCcash=0.0
-				LastPrice=btc_eth[-1][2]
-				print("Current BTC balance is $"+str(BTCcash))
+				LastPrice=pricelist[-1][2]
+				print("Current BTC balance is $%.6f" %BTCcash)
 				print()
-
-		time.sleep(0.5)
+		time.sleep(60)
 except KeyboardInterrupt:
 	print('The bot has stoped')
 	print()
 	if ETHcash>0:
-		BTCcash=fnSellETH(ETHcash,btc_eth[-1][1])
+		BTCcash=fnSellETH(ETHcash,pricelist[-1][1])
+		sessionfees.append(0.0075*ETHcash)
 		LastPrice=999999999999.9
-		print("Current BTC balance is $"+str(BTCcash))
+		print("Current BTC balance is $%.6f" %BTCcash)
 		ETHcash=0.0
 		print()
 	else:
-		print("Current BTC balance is $"+str(BTCcash))
-	print("This session's profit was: BTC"+str(BTCcash-startingpoint))
+		print("Current BTC balance is $%.6f" %BTCcash)
+	print("%d transactions were made and $%.6f was paid for fees" %(len(sessionfees), sum(sessionfees)))
+	print("This session's profit was: BTC%.8f" %(BTCcash-startingpoint))

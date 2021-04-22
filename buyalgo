@@ -1,0 +1,41 @@
+import requests, json
+
+bcash=0.01
+r=requests.get('https://api.bittrex.com/v3/markets/'+'ETH-BTC'+'/orderbook')
+rask=r.json()['ask']
+askrate=[]
+askqty=[]
+
+for p in rask:
+	askrate.append(float(p['rate']))
+	askqty.append(float(p['quantity']))
+
+mindx=askrate.index(min(askrate))
+print(askrate)
+print(askqty)
+feetot=0
+qtytot=0
+lastqty=0
+while bcash > askqty[mindx]*askrate[mindx]:
+	fee=askqty[mindx]*askrate[mindx]*.0075
+	#aqui va codigo que manda el put request al server
+	print(str(askqty[mindx])+' lot bought for $'+str(askqty[mindx]*askrate[mindx])+', fee='+str(fee))
+	bcash-=askqty[mindx]*askrate[mindx]+fee
+	print(str(bcash) +' remaining')
+	feetot+=fee
+	qtytot+=askqty[mindx]
+	askrate.pop(mindx)
+	askqty.pop(mindx)
+	mindx=askrate.index(min(askrate))
+	
+print()
+fee=bcash*.0075
+lastqty=(bcash-fee)/(askrate[mindx])
+
+print(str(lastqty)+' lot bought for $'+str(lastqty*askrate[mindx])+', fee='+str(fee))
+bcash-=lastqty*askrate[mindx]+fee
+print(str(bcash) +' remaining')
+feetot+=fee
+qtytot+=lastqty
+
+print('Qty bought '+str(qtytot)+" Fee paid "+str(feetot))

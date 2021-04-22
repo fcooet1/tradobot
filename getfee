@@ -1,0 +1,9 @@
+bittrexcommision=[[5000,0.0075,0.0075],[10000,0.005,0.005],[25000,0.0035,0.0035],
+                  [50000,0.002,0.002],[1000000,0.0012,0.0018],[10000000,0.0005,0.0015],
+                  [60000000,0.0002,0.001],[60000000,0.0,0.0008],[100000000,0.0,0.0005]]
+#[monthly trade upper limit in USD, maker fee, taker fee]
+#encontrar una forma de cachar si la orden que se va a poner va a ser maker o taker. de donde sacar esa info y como meterla a esta funtion
+#
+#regla general de reventa respecto a los fees: con c1 monedas, compras x goods a precio p1, con fee f1. x=c1(1-f1)/p1.
+#luego vendes x goods a precio p2 por c2 monedas, menos fee f2  c2=x(1-f2)*p2
+#ergo, c2>c1 si y solo si p2>p1/((1-f1)*(1-f2))
