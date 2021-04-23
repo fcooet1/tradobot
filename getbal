@@ -1,0 +1,20 @@
+import time, requests, hashlib, hmac
+
+def fnGetBalance():
+
+	URL = 'https://api.bittrex.com/v3/balances'
+	APIKEY = '50950ac95b6347aea4748e23e78decb6'
+	APISECRET = '79d9ae8ef14a4220b4c0e3767ff7475f'
+	method='GET'
+	timestamp = str(int(time.time()*1000))
+	requestbody = ''#parameters to make a POST requests
+	ach = hashlib.sha512(requestbody.encode()).hexdigest()
+	presignature=timestamp+URL+method+ach
+	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
+
+	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature}).json()
+	cash=[]
+	for cur in rauth:
+		if float(cur['available'])!=0.0:
+			cash.append([str(cur['currencySymbol']),float(cur['available'])])
+	return cash
