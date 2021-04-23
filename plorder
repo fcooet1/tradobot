@@ -1,0 +1,26 @@
+import time, requests, hashlib, hmac,json
+
+def fnPlaceOrder(coina,coinb,direction,qty,price):
+	URL = 'https://api.bittrex.com/v3/orders'
+	APIKEY = ''
+	APISECRET = ''
+	method='POST'
+	timestamp = str(int(time.time()*1000))
+	requestbody = {
+   	 "marketSymbol": str(coina)+"-"+str(coinb),
+   	 "direction": str(direction),
+    	"type":  "LIMIT",
+    	"quantity": str(qty),
+    	"limit": str(price),
+   	 "timeInForce": "FILL_OR_KILL"
+	}
+
+	print(requestbody)
+	ach = hashlib.sha512(bytes(json.dumps(requestbody),"utf-8")).hexdigest()
+	presignature=timestamp+URL+method+ach
+	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
+
+	rauth=requests.post(URL,json=requestbody,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
+	print(str(rauth.json()['code']))
+
+#fnPlaceOrder('ETH','BTC','SELL',30000,.05)
