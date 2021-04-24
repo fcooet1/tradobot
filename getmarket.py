@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 #Import Stuff
 import requests,json,time,datetime,sys
+import argparse
+
+parser = argparse.ArgumentParser(prog="getmarket")
+
+parser.add_argument("--currA", type=str, default="ETH", help="Currency A")
+parser.add_argument("--currB", type=str, default="USD", help="Currency B")
+
+args = parser.parse_args()
 
 #####################################
 #######       Functions       #######
@@ -58,8 +66,8 @@ mid=[]
 SMA5=[]
 SMA34=[]
 AO=[]
-coina='ETH'
-coinb='BTC'
+coina=args.currA
+coinb=args.currB
 print('TRADOBOT v0.1 - Automatic ETH-BTC trading on Bittrex Market by FO')
 print('This bot uses Bill Williams AO Momentum strategy to trade automatically')
 print('Input BTC amount to start trading')
