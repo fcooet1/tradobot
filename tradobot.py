@@ -96,7 +96,7 @@ def fnDetectCue(a):
 def fnBuy(m, p, f):
 	fee= m*f
 	g=(m-fee)/p
-	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer=fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f bought at $%.6f"%(coina,g, p))
@@ -108,7 +108,7 @@ def fnBuy(m, p, f):
 def fnSell(g,p,f):
 	fee=g*f
 	m=(g-fee)*p
-	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer=fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f sold at $%.6f"%(coina,g, p))
@@ -139,8 +139,8 @@ def main():
 		sessionprofit=0.0
 		global APIKEY
 		global APISECRET
-		APIKEY= '50950ac95b6347aea4748e23e78decb6'####YOUR APIKEY HERE####
-		APISECRET= '79d9ae8ef14a4220b4c0e3767ff7475f'####YOUR APISECRET HERE####
+		APIKEY= ''####YOUR APIKEY HERE####
+		APISECRET= ''####YOUR APISECRET HERE####
 		print()
 		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1')
 		print('This bot uses Bill Williams AO Momentum strategy to trade automatically')
@@ -206,6 +206,7 @@ def main():
 			SMA34.append(sum(mid[-34:])/34)
 			AO.append(SMA5[-1]-SMA34[-1])
 			aux=fnDetectCue(AO)
+			BTCcash=100
 			opp='none'
 			if aux==1:
 				#Sell 
