@@ -137,8 +137,8 @@ def main():
 		sessionfees=[]
 		global APIKEY
 		global APISECRET
-		APIKEY= '50950ac95b6347aea4748e23e78decb6'####YOUR APIKEY HERE####
-		APISECRET= '79d9ae8ef14a4220b4c0e3767ff7475f'####YOUR APISECRET HERE####
+		APIKEY= ''####YOUR APIKEY HERE####
+		APISECRET= ''####YOUR APISECRET HERE####
 		print()
 		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1')
 		print('This bot uses Bill Williams AO Momentum strategy to trade automatically')
