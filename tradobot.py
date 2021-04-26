@@ -108,7 +108,7 @@ def fnBuy(m, p, f):
 def fnSell(g,p,f):
 	fee=g*f
 	m=(g-fee)*p
-	answer=fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer=fnPlaceOrder('SELL',g-fee,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f sold at $%.6f"%(coina,g, p))
@@ -206,12 +206,11 @@ def main():
 			SMA34.append(sum(mid[-34:])/34)
 			AO.append(SMA5[-1]-SMA34[-1])
 			aux=fnDetectCue(AO)
-			BTCcash=100
 			opp='none'
 			if aux==1:
 				#Sell 
 				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
-					USDTcash=fnSell(BTCcash,pricelist[-1][1],gfee)
+					USDTcash=fnSell(float(fnGetBalance(coina)[-1][1]),pricelist[-1][1],gfee)
 					if USDTcash>0:
         					sessionfees.append(gfee*BTCcash*pricelist[-1][1])
 					LP=999999999999.9
