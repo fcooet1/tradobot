@@ -3,8 +3,8 @@ import time, requests, hashlib, hmac
 def fnGetBalance():
 
 	URL = 'https://api.bittrex.com/v3/balances'
-	APIKEY = '50950ac95b6347aea4748e23e78decb6'
-	APISECRET = '79d9ae8ef14a4220b4c0e3767ff7475f'
+	APIKEY = ''
+	APISECRET = ''
 	method='GET'
 	timestamp = str(int(time.time()*1000))
 	requestbody = ''#parameters to make a POST requests
