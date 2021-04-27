@@ -145,7 +145,7 @@ def main():
 		global coina
 		global coinb
 		global sessionfees
-		sessionfees=0.0
+		sessionfees=[]
 		global sessionprofit
 		sessionprofit=0.0
 		global APIKEY
@@ -172,30 +172,31 @@ def main():
 		rj=r.json()
 		print('Current price is %.6f %s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
 		print('Current available balance is:')
-		print('%s%.6f'%(coinb,USDTcash=float(fnGetBalance(coinb)[-1][1])))
+		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
 		print('Use available %s? Y/N' %coina)
 		auxqstn=''
-		auxqstn=str(input())
 		while auxqstn!=('y' or 'Y' or 'n' or 'N'):
+			auxqstn=str(input())
 			if auxqstn==('y' or 'Y'):
 				BTCcash=float(fnGetBalance(coina)[-1][1])
-			if auxqstn==('n' or 'N')
+			if auxqstn==('n' or 'N'):
 				BTCcash=0.0
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		global maxtrad
 		maxtrad=float(input())
-		while maxtrad>=USDTcash:
-			if maxtrad>USDTcash:
-				print('Insuficient funds.')
-				maxtrad=float(input())
+		while maxtrad>=float(fnGetBalance(coinb)[-1][1]):
+			
+			print('Insuficient funds.')
+			maxtrad=float(input())
+				
 		print('Input %s amount to start trading with.' %coinb)
-		auxcash=0.0
 		auxcash=float(input())
-		while auxcash>=USDTcash:
-			if auxcash>USDTcash:
-				print('Insuficient funds.')
-				auxcash=float(input())
+		while auxcash>=float(fnGetBalance(coinb)[-1][1]):
+
+			print('Insuficient funds.')
+			auxcash=float(input())
+	
 		USDTcash=auxcash
 		global startingpoint
 		startingpoint=USDTcash+BTCcash*float(rj[-1]['low'])
@@ -238,7 +239,7 @@ def main():
 				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
 					USDTcash=fnSell(BTCcash,pricelist[-1][1],gfee)
 					if USDTcash>0:
-        					sessionfees+=fnGetLastOrder()[1])
+        					sessionfees.append(fnGetLastOrder()[1])
 					LP=999999999999.9
 					BTCcash=0#float(fnGetBalance(coina)[-1][1])
 					gfee=fnFee()
@@ -251,7 +252,7 @@ def main():
 				if USDTcash>0:
 					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],gfee)
 					if BTCcash>0:
-		        			sessionfees+=fnGetLastOrder()[1])
+		        			sessionfees.append(fnGetLastOrder()[1])
 					LP=pricelist[-1][2]
 					gfee=fnFee()
 					opp='buy'
@@ -267,7 +268,7 @@ def main():
 		print("%d transactions were made and %s%.6f was paid for fees" %(len(sessionfees),coinb, sum(sessionfees)))
 		print("This session's profit was: %s%.8f" %(coinb,sessionprofit))
 		print('End of session available balance is:')
-		print('%s%.6f'%(coinb,USDTcash=float(fnGetBalance(coinb)[-1][1])))
+		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
 		print('Check Bittrex account open orders if coins are missing.')
 
