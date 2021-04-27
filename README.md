@@ -17,12 +17,14 @@ coinb='USDT' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 ```
 If your coina balance is positive and you want to use it to trade during this session, you can define a minimum price for the bot to start selling at:
 ```bash
-LP=float(0) #enter here the minimum price at which you want to sell available coina. If you decide to not use available coina leave it at 0.
+LP=float(0) #enter here the minimum price at which you want to sell available coina.
+            #If you decide to not use available coina leave it at 0.
 ```
 For safety reasons, fnBuy and fnSell, the functions in charge of placing orders on Bittrex system are not activated by default. To activate them modify the code within them as follows:
 Within fnBuy:
 ```bash
-answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)
+####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 ```
 Should look like:
 ```bash
@@ -30,7 +32,8 @@ answer=fnPlaceOrder('BUY',g,p)
 ```
 and within fnSell:
 ```bash
-answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+answer='<Response [201]>'#fnPlaceOrder('SELL',g,p)
+####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 ```
 Should look like:
 ```bash
