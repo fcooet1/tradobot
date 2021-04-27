@@ -100,7 +100,7 @@ def fnBuy(m, p, f):
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f bought at $%.6f"%(coina,g, p))
-		print('$%.5f fee paid'%fee)
+		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,m-fee,coinb,fee))
 		return g
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -108,11 +108,11 @@ def fnBuy(m, p, f):
 def fnSell(g,p,f):
 	fee=g*f
 	m=(g-fee)*p
-	answer=fnPlaceOrder('SELL',g-fee,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer=fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f sold at $%.6f"%(coina,g, p))
-		print('$%.5f fee paid'%(fee*p))
+		print("Transaction profit was %s%.6f" %(coinb,m-maxtrad))
 		return m
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -164,15 +164,21 @@ def main():
 		print('Current available balance is:')
 		print('%s%.6f'%(coinb,USDTcash))
 		print('%s%.6f'%(coina,BTCcash))
-		print('Input maximum amount to start trading. Close compiler otherwise')
+		print('Input maximum %s amount to trade.' %coinb)
 		global maxtrad
 		maxtrad=float(input())
 		while maxtrad>=USDTcash:
 			if maxtrad>USDTcash:
 				print('Insuficient funds')
 				maxtrad=float(input())
-			
-		USDTcash=maxtrad
+		print('Input %s amount to start trading.' %coinb)
+		auxcash=0.0
+		auxcash=float(input())
+		while auxcash>=USDTcash:
+			if auxcash>USDTcash:
+				print('Insuficient funds')
+				auxcash=float(input())	
+		USDTcash=auxcash
 		startdate=int(time.time())
 		print('Press Ctrl+C to stop the bot.')
 		print()
@@ -217,9 +223,8 @@ def main():
 					BTCcash=0#float(fnGetBalance(coina)[-1][1])
 					gfee=fnFee()
 					opp='sell'
-					print("Transaction profit was %s%.6f" %(coinb,USDTcash-maxtrad))
 					sessionprofit+=USDTcash-maxtrad
-					USTDcash=maxtrad
+					USDTcash=maxtrad
 					print()	
 			if aux==0:
 				#Buy
@@ -230,7 +235,6 @@ def main():
 					LP=pricelist[-1][2]
 					gfee=fnFee()
 					opp='buy'
-					print("Amount spent on transaction was %s%.6f" %(coinb,USDTcash))
 					USDTcash=0
 					print()
 			entry=[currenttime,pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
