@@ -1,25 +1,64 @@
 # tradobot
-Hola chotis. hay dos files en el repositorio, getmarket y getauth.
-La api de Bittrex ofrece dos tipos de REST requests, public y authenticated.
-getmarket es una rutina que hace un request publico: le pide a la APP informacion publica del mercado, en este caso el tipo de cambio de ethereum a bitcoin ('ETH-BTC')
-getauth hace un request privado, que requiere authenticacion. en este caso pide el balance de mi cuenta, que obviamente no es publico.
-Ambas rutinas se pueden modificar para hacer cualquiera de las operaciones necesarias para hacer una maquinita infernal del dinero.
 
-Lo que tengo hecho hasta ahora en getmarket, es:
+Tradobot uses [Bill Wiliams Momentum strategy](https://tradingstrategyguides.com/bill-williams-awesome-oscillator-strategy/#:~:text=The%20Bill%20Williams%20Awesome%20Oscillator,confirming%20the%20price%20action%20shift.) to continuously and automatically trade on Bittrex market platform through their API.
 
-una funcion gnGetSTXData(a,b) que va Bittrex y le pide los valores de cambio de la moneda 'a' a moneda 'b'. te devuelve un vector que tiene: (fecha del request, bidrate, ask rate). la fecha del request queda en formato unix epoch. los valores Ask y Bid son los valores de venta y compra del mercado. Bid es el menor, al que vendes y ask es el mayor, al que compras.
+## Setup
 
-una funcion fnDetectCue(a), donde 'a' es una lista con los valores del Awesome Oscilator. Esta usa los ultimos 3 valores de la lista AO para detectar pistas y decidir cuando comprar o vender, segun la estrategia de momentum del Bill Williams, que es la que he estado usando manualmente desde febrero con buenos resultados (subi un excel con un simulador visual, apretas F9 y genera charts randomizados, mostrando el oscilador y donde ocurren los cues).
+To get started you need to modify the following variables in the code:
+Add you API key and Secret inside the apostrophes.
+```bash
+APIKEY= ''####YOUR APIKEY HERE####
+APISECRET= ''####YOUR APISECRET HERE####
+```
+Define which coins you want this session to trade (for example, for BTC-USDT, asign variables as follows).
+```bash
+coina='BTC' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
+coinb='USDT' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
+```
+If your coina balance is positive and you want to use it to trade during this session, you can define a minimum price for the bot to start selling at:
+```bash
+LP=float(0) #enter here the minimum price at which you want to sell available coina. If you decide to not use available coina leave it at 0.
+```
+For safety reasons, fnBuy and fnSell, the functions in charge of placing orders on Bittrex system are not activated by default. To activate them modify the code within them as follows:
+Within fnBuy:
+```bash
+answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+```
+Should look like:
+```bash
+answer=fnPlaceOrder('BUY',g,p)
+```
+and within fnSell:
+```bash
+answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+```
+Should look like:
+```bash
+answer=fnPlaceOrder('SELL',g,p)
+```
+## Getting Started
+Now you should be ready to go. Run the code using your favourite compiler.
+As you run the program, it will try to authenticate. If it fails you'll be noticed and the program will shut down. You'll need to check your APIKEY and APISECRET values. If they are correct, you should get information of the current buy price of the selected market and your available funds.
+The program will ask if you want to use your available balance of coina. Input Y for Yes or N for No.
+Then it will ask for the maximum amount of coinb you'll allow it to get from your account during this session. Input the value as int or float. This value cannot be larger than your current available balance.
+Finally it'll ask you to input the amount you wish to start with. Input as int or float. This value, as well, cannot be larger than your current available balance.
+Once you enter this input, the program will start runnung. It'll get market data from Bittrex each minute and diplay it in the console in this format:
+```bash
+[currentUNIXepoch,priceLow,priceHigh]
+```
+Whenever the transaction criteria are filled, the Buy or Sell function will be executed. Buy orders are filled using 100% of the asigned coinb value. Sell orders will be executed only when the price is above the last Buy price or the price asigned to the LP variable. This takes Bittrex comission into account, so Sell orders will always profit.
+A summary of each transaction will be displayed in the console.
+The program will run indefinitelly. It can be stoped by pressing Ctrl+C. A summary of the sesion will be displayed in the console before shutting down.
+## Data Record
+The program keeps a record of each minute's events in a text file called ledger_xxxxxxxxxx.txt, where xxxxxxxxxx is the UNIXepoch at which the session started. Data is stored in the following format:
+```bash
+[UNIXepoch, priceLow, priceHigh, AwesomeOscilatorValue, AwesomeOscilatorCue, transactionType, lastBuyPrice]
+```
 
-las siguientes dos funciones son para probar como anda la estregia y comprar o vender localmente con plata falsa definida localmente.
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-Despues el programa inicia. define las variables, imprime un verso y hace un loop usando fnGetSTXData, donde recibe datos de mercado del servidor de Bittrex, hace 34 iteraciones que es lo minimo que necesitas para empezar a armar tu Awesome Oscilator.
+Please make sure to update tests as appropriate.
 
-en el main, usa los 34 datos para armar el primer valor del AO y luego usa fnDetectCues para cachar cuando comprar o vender + condiciones obvias como no vender mas barato de lo que compraste etc. y ahi se queda, recibiendo datos, armando el oscilador, detectando cues y tratando de hacer transacciones cuando es convenite. habria que cachar como ajustar el periodo de actuualizacion para no hacer demasiadas transaciones por valores bajos.
-
-Tiene una excepcion para cortar el ciclo con Ctrl+C, donde liquida todo lo que tienes, calcula el profit de la sesion y termina el programa.
-
-
-Despues getauth, es solo un ejemplo para cumplir con el protocolo de autenticacion de Bittrex para hacer requests privados. La api te pide generar signatures formateados y encriptados de forma especifica para hacer un request valido y el codigo lo hace asi:
-defines el url de donde vas a hacer el request (en este caso la base de datos de balances), le pones las keys que te dan en tu cuenta, el metodo que vas a usar en tu request (GET si vas a pedir informasion, PUT si vas a modificar alguna wea, etc), un timestamp que se calcula con la hora local en formato UNIX epoch milisegundos. request body es el pedaso de codigo que tenis que mandar si vas a hacer un PUT request. en este caso es blank porque no necesitas mandar parametros para pedir un balance. El protocolo de bittrex te pide que lo encriptes en hash 512 y lo pases hexadecimal. Estos son los datos que teienes que mandar en el header de tu requst. Ademas, para la autenticacion tienes que mandar una firma, que se hace con una concatenacion de (timestamp+URL+method+request body encriptado), encriptada con hash512, usando la KEY que te pasan en tu cuenta y pasada a hexadecimal.
-Finalmente, mandas el request a la URL de balances y le plantas los datos de autenticacion que son Tu API Key, el time stamp, el body content encriptado y la firma y te devuelve los datos de balance de tu cuenta.
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
