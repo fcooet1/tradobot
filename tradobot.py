@@ -231,12 +231,12 @@ def main():
 				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
 					USDTcash=fnSell(float(fnGetBalance(coina)[-1][1]),pricelist[-1][1],gfee)
 					if USDTcash>0:
-        					sessionfees.append(gfee*BTCcash*pricelist[-1][1])
+        					sessionfees.append(fnGetLastOrder()[1])
 					LP=999999999999.9
 					BTCcash=0#float(fnGetBalance(coina)[-1][1])
 					gfee=fnFee()
 					opp='sell'
-					sessionprofit+=USDTcash-maxtrad
+					sessionprofit+=fnGetLastOrder()[0]-fnGetLastOrder()[1]-maxtrad
 					USDTcash=maxtrad
 					print()	
 			if aux==0:
@@ -244,7 +244,7 @@ def main():
 				if USDTcash>0:
 					BTCcash=fnBuy(USDTcash,pricelist[-1][2],gfee)
 					if BTCcash>0:
-		        			sessionfees.append(gfee*USDTcash)
+		        			sessionfees.append(fnGetLastOrder()[1])
 					LP=pricelist[-1][2]
 					gfee=fnFee()
 					opp='buy'
