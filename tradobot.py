@@ -7,7 +7,7 @@ def fnSavetoLedger(entry,startdate):
 	with open('ledger_'+str(startdate)+'.txt','a') as filehandle:
 		filehandle.write('%s\n' %entry)
 
-def fnGetLastOrder()
+def fnGetLastOrder():
 	URL = 'https://api.bittrex.com/v3/orders/closed'
 	APIKEY = '50950ac95b6347aea4748e23e78decb6'
 	APISECRET = '79d9ae8ef14a4220b4c0e3767ff7475f'
