@@ -166,8 +166,6 @@ def main():
 		USDTcash=float(fnGetBalance(coinb)[-1][1])
 		global gfee
 		gfee=fnFee()
-		global startingpoint
-		startingpoint=USDTcash
 		global LP
 		LP=float(0) #enter here the minimum price at which you wanto to star selling. The program will take care of this in future transactions.
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
@@ -192,6 +190,8 @@ def main():
 				print('Insuficient funds')
 				auxcash=float(input())	
 		USDTcash=auxcash
+		global startingpoint
+		startingpoint=USDTcash
 		startdate=int(time.time())
 		print('Press Ctrl+C to stop the bot.')
 		print()
