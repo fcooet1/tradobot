@@ -109,7 +109,7 @@ def fnDetectCue(a):
 def fnBuy(m, p, f):
 	fee= m*f
 	g=(m-fee)/p
-	answer=fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f bought at $%.6f"%(coina,fnGetLastOrder()[2], p))
@@ -120,12 +120,12 @@ def fnBuy(m, p, f):
 		return 0
 def fnSell(g,p,f):
 	fee=g*f
-	m=(g-fee)*p
-	answer=fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f sold at $%.6f"%(coina,fnGetLastOrder()[2], p))
-		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,fnGetLastOrder()[0]-fnGetLastOrder()[1]-maxtrad,fnGetLastOrder()[1]))
+		m=fnGetLastOrder()[0]-fnGetLastOrder()[1]
+		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-startingpoint,fnGetLastOrder()[1]))
 		return m
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -143,57 +143,64 @@ def main():
 		global AO
 		AO=[]
 		global coina
-		coina='BTC' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 		global coinb
-		coinb='USDT' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 		global sessionfees
-		sessionfees=[]
+		sessionfees=0.0
 		global sessionprofit
 		sessionprofit=0.0
 		global APIKEY
 		global APISECRET
+		global gfee
+		global LP
+		
+		coina='BTC' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
+		coinb='USDT' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
+		LP=float(0) #enter here the minimum price at which you want to sell available BTC. If you decide to not use available BTC leave it at 0.
+		
 		APIKEY= ''####YOUR APIKEY HERE####
 		APISECRET= ''####YOUR APISECRET HERE####
+		
 		print()
-		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1')
-		print('This bot uses Bill Williams AO Momentum strategy to trade automatically')
-
+		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1.')
+		print('This bot uses Bill Williams Momentum strategy to trade automatically.')
 		if APIKEY=='' or APISECRET=='':
 			print("APIKEY or APISECRET are missing. The program will end.")
 			input()
 			exit()
-		BTCcash=float(fnGetBalance(coina)[-1][1])
-		USDTcash=float(fnGetBalance(coinb)[-1][1])
-		global gfee
 		gfee=fnFee()
-		global LP
-		LP=float(0) #enter here the minimum price at which you wanto to star selling. The program will take care of this in future transactions.
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		rj=r.json()
-
-		print('Current price is %.6f %s for 1%s' %(float(rj[-1]['high']),coinb,coina))
+		print('Current price is %.6f %s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
 		print('Current available balance is:')
-		print('%s%.6f'%(coinb,USDTcash))
-		print('%s%.6f'%(coina,BTCcash))
-		print('Input maximum %s amount to trade.' %coinb)
+		print('%s%.6f'%(coinb,USDTcash=float(fnGetBalance(coinb)[-1][1])))
+		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
+		print('Use available %s? Y/N' %coina)
+		auxqstn=''
+		auxqstn=str(input())
+		while auxqstn!=('y' or 'Y' or 'n' or 'N'):
+			if auxqstn==('y' or 'Y'):
+				BTCcash=float(fnGetBalance(coina)[-1][1])
+			if auxqstn==('n' or 'N')
+				BTCcash=0.0
+		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		global maxtrad
 		maxtrad=float(input())
 		while maxtrad>=USDTcash:
 			if maxtrad>USDTcash:
-				print('Insuficient funds')
+				print('Insuficient funds.')
 				maxtrad=float(input())
-		print('Input %s amount to start trading.' %coinb)
+		print('Input %s amount to start trading with.' %coinb)
 		auxcash=0.0
 		auxcash=float(input())
 		while auxcash>=USDTcash:
 			if auxcash>USDTcash:
-				print('Insuficient funds')
-				auxcash=float(input())	
+				print('Insuficient funds.')
+				auxcash=float(input())
 		USDTcash=auxcash
 		global startingpoint
-		startingpoint=USDTcash
+		startingpoint=USDTcash+BTCcash*float(rj[-1]['low'])
 		startdate=int(time.time())
-		print('Press Ctrl+C to stop the bot.')
+		print('Press Ctrl+C anytime to stop the bot. A ledger file will be saved containing all session info. Check README to understand ledger data.')
 		print()
 		
 		
@@ -212,7 +219,7 @@ def main():
 			sys.stdout.flush()
 		print()
 		print()
-		print("Waiting for Cues")
+		print("Program now will wait for market Cues each minute. Transactions will be displayed when made.")
 		print()
 
 
@@ -229,37 +236,40 @@ def main():
 			if aux==1:
 				#Sell 
 				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
-					USDTcash=fnSell(float(fnGetBalance(coina)[-1][1]),pricelist[-1][1],gfee)
+					USDTcash=fnSell(BTCcash,pricelist[-1][1],gfee)
 					if USDTcash>0:
-        					sessionfees.append(fnGetLastOrder()[1])
+        					sessionfees+=fnGetLastOrder()[1])
 					LP=999999999999.9
 					BTCcash=0#float(fnGetBalance(coina)[-1][1])
 					gfee=fnFee()
 					opp='sell'
-					sessionprofit+=fnGetLastOrder()[0]-fnGetLastOrder()[1]-maxtrad
+					sessionprofit+=USDTcash-startingpoint
 					USDTcash=maxtrad
 					print()	
 			if aux==0:
 				#Buy
 				if USDTcash>0:
-					BTCcash=fnBuy(USDTcash,pricelist[-1][2],gfee)
+					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],gfee)
 					if BTCcash>0:
-		        			sessionfees.append(fnGetLastOrder()[1])
+		        			sessionfees+=fnGetLastOrder()[1])
 					LP=pricelist[-1][2]
 					gfee=fnFee()
 					opp='buy'
 					USDTcash=0
-					BTCcash=float(fnGetBalance(coina)[-1][1])
 					print()
 			entry=[currenttime,pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
 			fnSavetoLedger(entry,startdate)
 			time.sleep(currenttime+60-time.time())
 	except KeyboardInterrupt:
+		print()
 		print('TRADOBOT has stoped')
 		print()
-		print("Current balance is %s%.6f" %(coinb,USDTcash))
 		print("%d transactions were made and %s%.6f was paid for fees" %(len(sessionfees),coinb, sum(sessionfees)))
 		print("This session's profit was: %s%.8f" %(coinb,sessionprofit))
+		print('End of session available balance is:')
+		print('%s%.6f'%(coinb,USDTcash=float(fnGetBalance(coinb)[-1][1])))
+		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
+		print('Check Bittrex account open orders if coins are missing.')
 
 ##################################################
 #######       Program Inizialization       #######
