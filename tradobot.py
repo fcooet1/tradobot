@@ -7,7 +7,7 @@ def fnSavetoLedger(entry,startdate):
 	with open('ledger_'+str(startdate)+'.txt','a') as filehandle:
 		filehandle.write('%s\n' %entry)
 
-def fnGetLastOrder():
+def fnGetLastOrder(a):
 	URL = 'https://api.bittrex.com/v3/orders/closed'
 	APIKEY = '50950ac95b6347aea4748e23e78decb6'
 	APISECRET = '79d9ae8ef14a4220b4c0e3767ff7475f'
@@ -22,6 +22,16 @@ def fnGetLastOrder():
 		print('Authentication failed. The progream will close.')
 		input()
 		exit()
+	while str(rauth.jason()[0]['type'])!=a:
+		sleep(1)
+		timestamp = str(int(time.time()*1000))
+		presignature=timestamp+URL+method+ach
+		signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
+		rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
+		if str(rauth)!='<Response [200]>':
+			print('Authentication failed. The progream will close.')
+			input()
+			exit()
 	return [float(rauth.json()[0]['proceeds']),float(rauth.json()[0]['commission']),float(rauth.json()[0]['fillQuantity'])]		
 		
 def fnGetBalance(a):
@@ -124,8 +134,8 @@ def fnBuy(m, p, f):
 	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
-		print("%s%.6f bought at $%.6f"%(coina,fnGetLastOrder()[2], p))
-		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,fnGetLastOrder()[0],coinb,fnGetLastOrder()[1]))
+		print("%s%.6f bought at $%.6f"%(coina,fnGetLastOrder('BUY')[2], p))
+		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,fnGetLastOrder('BUY')[0],coinb,fnGetLastOrder('BUY')[1]))
 		return g
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -135,9 +145,9 @@ def fnSell(g,p,f):
 	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
-		print("%s%.6f sold at $%.6f"%(coina,fnGetLastOrder()[2], p))
-		m=fnGetLastOrder()[0]-fnGetLastOrder()[1]
-		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-startingpoint,fnGetLastOrder()[1]))
+		print("%s%.6f sold at $%.6f"%(coina,fnGetLastOrder('SELL')[2], p))
+		m=fnGetLastOrder('SELL')[0]-fnGetLastOrder()[1]
+		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-startingpoint,fnGetLastOrder('SELL')[1]))
 		return m
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -251,7 +261,7 @@ def main():
 				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
 					USDTcash=fnSell(BTCcash,pricelist[-1][1],gfee)
 					if USDTcash>0:
-        					sessionfees.append(fnGetLastOrder()[1])
+        					sessionfees.append(fnGetLastOrder('SELL')[1])
 					LP=999999999999.9
 					BTCcash=0#float(fnGetBalance(coina)[-1][1])
 					gfee=fnFee()
@@ -264,7 +274,7 @@ def main():
 				if USDTcash>0:
 					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],gfee)
 					if BTCcash>0:
-		        			sessionfees.append(fnGetLastOrder()[1])
+		        			sessionfees.append(fnGetLastOrder('BUY')[1])
 					LP=pricelist[-1][2]
 					gfee=fnFee()
 					opp='buy'
