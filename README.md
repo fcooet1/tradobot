@@ -10,7 +10,7 @@ Add you API key and Secret inside the apostrophes.
 APIKEY= ''####YOUR APIKEY HERE####
 APISECRET= ''####YOUR APISECRET HERE####
 ```
-Define which coins you want this session to trade (for example, for BTC-USDT, asign variables as follows).
+Define which coins you want this session to trade (for example, for BTC-USDT, assign variables as follows).
 ```bash
 coina='BTC' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 coinb='USDT' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
