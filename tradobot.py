@@ -18,6 +18,10 @@ def fnGetLastOrder():
 	presignature=timestamp+URL+method+ach
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
+	if str(rauth)!='<Response [200]>':
+		print('Authentication failed. The progream will close.')
+		input()
+		exit()
 	return [float(rauth.json()[0]['proceeds']),float(rauth.json()[0]['commission']),float(rauth.json()[0]['fillQuantity'])]		
 		
 def fnGetBalance(a):
@@ -57,6 +61,10 @@ def fnPlaceOrder(direction,qty,price):
 	presignature=timestamp+URL+method+ach
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.post(URL,json=requestbody,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
+	if str(rauth)!=('<Response [201]>' or '<Response [409]>') :
+		print('Authentication failed. The progream will close.')
+		input()
+		exit()
 	return(str(rauth))
 
 def fnFee():
@@ -84,6 +92,10 @@ def fnFee():
 
 def fnGetSTXData(a, b):
 	r=requests.get('https://api.bittrex.com/v3/markets/'+a+'-'+b+'/ticker')
+	if str(r)!='<Response [200]>':
+		print('Server not responding. The progream will close.')
+		input()
+		exit()
 	l=float(r.json()['bidRate'])
 	h=float(r.json()['askRate'])
 	return([int(time.time()), l, h])
