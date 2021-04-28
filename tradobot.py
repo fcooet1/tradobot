@@ -132,8 +132,9 @@ def fnBuy(m, p, f,i):
 	g=(m-fee)/p
 	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p,i)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
+		g=fnGetLastOrder(i)[2]
 		print('*****************************************************')
-		print("%s%.6f bought at $%.6f"%(coina,fnGetLastOrder(i)[2], p))
+		print("%s%.6f bought at $%.6f"%(coina,g, p))
 		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,fnGetLastOrder(i)[0],coinb,fnGetLastOrder(i)[1]))
 		return g
 	else:
