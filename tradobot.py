@@ -1,14 +1,14 @@
 #!/usr/bin/python
 #fcooet1 APR 2021
 
-import requests,json,time,sys, hashlib,hmac
+import requests,json,time,sys,hashlib,hmac,uuid
 
 def fnSavetoLedger(entry,startdate):
 	with open('ledger_'+str(startdate)+'.txt','a') as filehandle:
 		filehandle.write('%s\n' %entry)
 
-def fnGetLastOrder(a):
-	URL = 'https://api.bittrex.com/v3/orders/closed'
+def fnGetLastOrder(uuid):
+	URL = 'https://api.bittrex.com/v3/orders/'+str(uuid)
 	APIKEY = '50950ac95b6347aea4748e23e78decb6'
 	APISECRET = '79d9ae8ef14a4220b4c0e3767ff7475f'
 	method='GET'
@@ -22,7 +22,7 @@ def fnGetLastOrder(a):
 		print('Authentication failed. The progream will close.')
 		input()
 		exit()
-	while str(rauth.jason()[0]['type'])!=a:
+	while str(rauth.jason()[0]['clientOrderId'])!=uuid:
 		sleep(1)
 		timestamp = str(int(time.time()*1000))
 		presignature=timestamp+URL+method+ach
@@ -55,7 +55,7 @@ def fnGetBalance(a):
 			cash.append([str(cur['currencySymbol']),float(cur['available'])])
 	return cash
 
-def fnPlaceOrder(direction,qty,price):
+def fnPlaceOrder(direction,qty,price,uuid):
 	URL = 'https://api.bittrex.com/v3/orders'
 	method='POST'
 	timestamp = str(int(time.time()*1000))
@@ -65,7 +65,8 @@ def fnPlaceOrder(direction,qty,price):
     	"type":  "LIMIT",
     	"quantity": str(qty),
     	"limit": str(price),
-   	 "timeInForce": "FILL_OR_KILL"
+   	"timeInForce": "FILL_OR_KILL",
+	"clientOrderId": str(uuid)
 	}
 	ach = hashlib.sha512(bytes(json.dumps(requestbody),"utf-8")).hexdigest()
 	presignature=timestamp+URL+method+ach
@@ -128,26 +129,26 @@ def fnDetectCue(a):
 			#Saucer Cue: Sell
 			return 1
 
-def fnBuy(m, p, f):
+def fnBuy(m, p, f,i):
 	fee= m*f
 	g=(m-fee)/p
-	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p,i)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
-		print("%s%.6f bought at $%.6f"%(coina,fnGetLastOrder('BUY')[2], p))
-		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,fnGetLastOrder('BUY')[0],coinb,fnGetLastOrder('BUY')[1]))
+		print("%s%.6f bought at $%.6f"%(coina,fnGetLastOrder(i)[2], p))
+		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,fnGetLastOrder(i)[0],coinb,fnGetLastOrder(i)[1]))
 		return g
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
 		return 0
-def fnSell(g,p,f):
+def fnSell(g,p,f,i):
 	fee=g*f
-	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p,i) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
-		print("%s%.6f sold at $%.6f"%(coina,fnGetLastOrder('SELL')[2], p))
-		m=fnGetLastOrder('SELL')[0]-fnGetLastOrder()[1]
-		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-startingpoint,fnGetLastOrder('SELL')[1]))
+		print("%s%.6f sold at $%.6f"%(coina,fnGetLastOrder(i)[2], p))
+		m=fnGetLastOrder(i)[0]-fnGetLastOrder(i)[1]
+		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-startingpoint,fnGetLastOrder(i)[1]))
 		return m
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -259,7 +260,8 @@ def main():
 			if aux==1:
 				#Sell 
 				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
-					USDTcash=fnSell(BTCcash,pricelist[-1][1],gfee)
+					myuuid = uuid.uuid4()
+					USDTcash=fnSell(BTCcash,pricelist[-1][1],gfee,myuuid)
 					if USDTcash>0:
         					sessionfees.append(fnGetLastOrder('SELL')[1])
 					LP=999999999999.9
@@ -272,7 +274,8 @@ def main():
 			if aux==0:
 				#Buy
 				if USDTcash>0:
-					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],gfee)
+					myuuid = uuid.uuid4()
+					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],gfee,myuuid)
 					if BTCcash>0:
 		        			sessionfees.append(fnGetLastOrder('BUY')[1])
 					LP=pricelist[-1][2]
