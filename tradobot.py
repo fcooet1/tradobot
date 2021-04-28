@@ -8,7 +8,7 @@ def fnSavetoLedger(entry,startdate):
 		filehandle.write('%s\n' %entry)
 
 def fnGetLastOrder(uuid):
-	URL = 'https://api.bittrex.com/v3/orders/'+str(uuid)
+	URL = 'https://api.bittrex.com/v3/orders/'+uuid
 	method='GET'
 	timestamp = str(int(time.time()*1000))
 	requestbody = ''
@@ -64,7 +64,7 @@ def fnPlaceOrder(direction,qty,price,uuid):
     	"quantity": str(qty),
     	"limit": str(price),
    	"timeInForce": "FILL_OR_KILL",
-	"clientOrderId": str(uuid)
+	"clientOrderId": uuid
 	}
 	ach = hashlib.sha512(bytes(json.dumps(requestbody),"utf-8")).hexdigest()
 	presignature=timestamp+URL+method+ach
@@ -127,9 +127,8 @@ def fnDetectCue(a):
 			#Saucer Cue: Sell
 			return 1
 
-def fnBuy(m, p, f,i):
-	fee= m*f
-	g=(m-fee)/p
+def fnBuy(m, p, i):
+	g=m*(1-gfee)/p
 	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p,i)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		g=fnGetLastOrder(i)[2]
@@ -140,8 +139,7 @@ def fnBuy(m, p, f,i):
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
 		return 0
-def fnSell(g,p,f,i):
-	fee=g*f
+def fnSell(g, p, i):
 	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p,i) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
@@ -223,7 +221,8 @@ def main():
 		global startingpoint
 		startingpoint=USDTcash+BTCcash*float(rj[-1]['low'])
 		startdate=int(time.time())
-		print('Press Ctrl+C anytime to stop the bot. A ledger file will be saved containing all session info. Check README to understand ledger data.')
+		print('Press Ctrl+C anytime to stop the bot.')
+		print('A ledger file will be saved containing all session info. Check README to understand ledger data.')
 		print()
 		
 		
@@ -242,7 +241,7 @@ def main():
 			sys.stdout.flush()
 		print()
 		print()
-		print("Program now will wait for market Cues each minute. Transactions will be displayed when made.")
+		print("Tradobot will now wait for market Cues each passing minute. Transactions will be displayed when made.")
 		print()
 
 
@@ -260,9 +259,9 @@ def main():
 				#Sell 
 				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
 					myuuid = str(uuid.uuid4())
-					USDTcash=fnSell(BTCcash,pricelist[-1][1],gfee,myuuid)
+					USDTcash=fnSell(BTCcash,pricelist[-1][1],myuuid)
 					if USDTcash>0:
-        					sessionfees.append(fnGetLastOrder('SELL')[1])
+        					sessionfees.append(fnGetLastOrder(myuuid)[1])
 					LP=999999999999.9
 					BTCcash=0#float(fnGetBalance(coina)[-1][1])
 					gfee=fnFee()
@@ -274,9 +273,9 @@ def main():
 				#Buy
 				if USDTcash>0:
 					myuuid = str(uuid.uuid4())
-					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],gfee,myuuid)
+					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],myuuid)
 					if BTCcash>0:
-		        			sessionfees.append(fnGetLastOrder('BUY')[1])
+		        			sessionfees.append(fnGetLastOrder(myuuid)[1])
 					LP=pricelist[-1][2]
 					gfee=fnFee()
 					opp='buy'
