@@ -260,7 +260,7 @@ def main():
 			if aux==1:
 				#Sell 
 				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
-					myuuid = uuid.uuid4()
+					myuuid = str(uuid.uuid4())
 					USDTcash=fnSell(BTCcash,pricelist[-1][1],gfee,myuuid)
 					if USDTcash>0:
         					sessionfees.append(fnGetLastOrder('SELL')[1])
@@ -274,7 +274,7 @@ def main():
 			if aux==0:
 				#Buy
 				if USDTcash>0:
-					myuuid = uuid.uuid4()
+					myuuid = str(uuid.uuid4())
 					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],gfee,myuuid)
 					if BTCcash>0:
 		        			sessionfees.append(fnGetLastOrder('BUY')[1])
