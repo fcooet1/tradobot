@@ -23,21 +23,21 @@ LP=float(0) #enter here the minimum price at which you want to sell available co
 For safety reasons, fnBuy and fnSell, the functions in charge of placing orders on Bittrex system are not activated by default. To activate them modify the code within them as follows:
 Within fnBuy:
 ```bash
-answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)
+answer='<Response [201]>'#fnPlaceOrder('BUY',g,p,i)
 ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 ```
 Should look like:
 ```bash
-answer=fnPlaceOrder('BUY',g,p)
+answer=fnPlaceOrder('BUY',g,p,i)
 ```
 and within fnSell:
 ```bash
-answer='<Response [201]>'#fnPlaceOrder('SELL',g,p)
+answer='<Response [201]>'#fnPlaceOrder('SELL',g,p,i)
 ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 ```
 Should look like:
 ```bash
-answer=fnPlaceOrder('SELL',g,p)
+answer=fnPlaceOrder('SELL',g,p,i)
 ```
 ## Getting Started
 Now you should be ready to go. Run the code using your favourite compiler.
