@@ -5,7 +5,7 @@ Tradobot uses [Bill Wiliams Momentum strategy](https://tradingstrategyguides.com
 ## Setup
 
 To get started you need to modify the following variables in the code:
-Add you API key and Secret inside the apostrophes.
+Add you API Key and Secret inside the apostrophes.
 ```bash
 APIKEY= ''####YOUR APIKEY HERE####
 APISECRET= ''####YOUR APISECRET HERE####
@@ -62,6 +62,8 @@ The program keeps a record of each minute's events in a text file called ledger_
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
+
+Feel free to use my Bittrex request code if you're creating a new account: GN5-2CC-ZK3
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
