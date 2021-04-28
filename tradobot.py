@@ -9,8 +9,6 @@ def fnSavetoLedger(entry,startdate):
 
 def fnGetLastOrder(uuid):
 	URL = 'https://api.bittrex.com/v3/orders/'+str(uuid)
-	APIKEY = '50950ac95b6347aea4748e23e78decb6'
-	APISECRET = '79d9ae8ef14a4220b4c0e3767ff7475f'
 	method='GET'
 	timestamp = str(int(time.time()*1000))
 	requestbody = ''
