@@ -199,9 +199,9 @@ def main():
 		while auxqstn!=('y' or 'Y' or 'n' or 'N'):
 			auxqstn=str(input())
 			if auxqstn==('y' or 'Y'):
-				BTCcash=float(fnGetBalance(coina)[-1][1])
+				coinacash=float(fnGetBalance(coina)[-1][1])
 			if auxqstn==('n' or 'N'):
-				BTCcash=0.0
+				coinacash=0.0
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		global maxtrad
 		maxtrad=float(input())
@@ -217,9 +217,9 @@ def main():
 			print('Insuficient funds.')
 			auxcash=float(input())
 	
-		USDTcash=auxcash
+		coinbcash=auxcash
 		global startingpoint
-		startingpoint=USDTcash+BTCcash*float(rj[-1]['low'])
+		startingpoint=USDTcash+coinacash*float(rj[-1]['low'])
 		startdate=int(time.time())
 		print('Press Ctrl+C anytime to stop the bot.')
 		print('A ledger file will be saved containing all session info. Check README to understand ledger data.')
@@ -257,31 +257,31 @@ def main():
 			opp='none'
 			if aux==1:
 				#Sell 
-				if LP/(1-gfee)**2<pricelist[-1][1] and BTCcash>0:
+				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
 					myuuid = str(uuid.uuid4())
-					USDTcash=fnSell(BTCcash,pricelist[-1][1],myuuid)
-					if USDTcash>0:
+					coinbcash=fnSell(coinacash,pricelist[-1][1],myuuid)
+					if coinbcash>0:
         					sessionfees.append(fnGetLastOrder(myuuid)[1])
 					LP=999999999999.9
-					BTCcash=0#float(fnGetBalance(coina)[-1][1])
+					coinacash=0#float(fnGetBalance(coina)[-1][1])
 					gfee=fnFee()
 					opp='sell'
-					sessionprofit+=USDTcash-startingpoint
-					USDTcash=maxtrad
+					sessionprofit+=coinbcash-startingpoint
+					coinbcash=maxtrad
 					print()	
 			if aux==0:
 				#Buy
-				if USDTcash>0:
+				if coinbcash>0:
 					myuuid = str(uuid.uuid4())
-					BTCcash+=fnBuy(USDTcash,pricelist[-1][2],myuuid)
-					if BTCcash>0:
+					coinacash+=fnBuy(coinbcash,pricelist[-1][2],myuuid)
+					if coinacash>0:
 		        			sessionfees.append(fnGetLastOrder(myuuid)[1])
 					LP=pricelist[-1][2]
 					gfee=fnFee()
 					opp='buy'
-					USDTcash=0
+					coinbcash=0
 					print()
-			entry=[currenttime,pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
+			entry=[time.ctime(currenttime),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
 			fnSavetoLedger(entry,startdate)
 			time.sleep(currenttime+60-time.time())
 	except KeyboardInterrupt:
