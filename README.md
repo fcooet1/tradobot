@@ -55,7 +55,7 @@ The program will run indefinitelly. It can be stoped by pressing Ctrl+C. A summa
 ## Data Record
 The program keeps a record of each minute's events in a text file called ledger_xxxxxxxxxx.txt, where xxxxxxxxxx is the UNIXepoch at which the session started. Data is stored in the following format:
 ```bash
-[UNIXepoch, priceLow, priceHigh, AwesomeOscilatorValue, AwesomeOscilatorCue, transactionType, lastBuyPrice]
+[Date and time, priceLow, priceHigh, AwesomeOscilatorValue, AwesomeOscilatorCue, transactionType, lastBuyPrice]
 ```
 
 ## Contributing
