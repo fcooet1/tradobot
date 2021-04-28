@@ -1,6 +1,6 @@
 # tradobot
 
-Tradobot uses [Bill Wiliams Momentum strategy](https://tradingstrategyguides.com/bill-williams-awesome-oscillator-strategy/#:~:text=The%20Bill%20Williams%20Awesome%20Oscillator,confirming%20the%20price%20action%20shift.) to continuously and automatically trade on Bittrex market platform through their API.
+Tradobot uses [Bill Wiliams Momentum strategy](https://tradingstrategyguides.com/bill-williams-awesome-oscillator-strategy/#:~:text=The%20Bill%20Williams%20Awesome%20Oscillator,confirming%20the%20price%20action%20shift.) to continuously and automatically trade on Bittrex market platform through their API. It can handle multiple instances, so you can run it on different markets simultaneously, as long as the server responce limit is not reached.
 
 ## Setup
 
