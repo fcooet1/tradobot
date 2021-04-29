@@ -263,6 +263,7 @@ def main():
 			AO.append(SMA5[-1]-SMA34[-1])
 			aux=fnDetectCue(AO)
 			opp='none'
+			myuuid='none'
 			if aux==1:
 				#Sell 
 				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
@@ -289,7 +290,7 @@ def main():
 					opp='buy'
 					coinbcash=0
 					print()
-			entry=[time.ctime(currenttime),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
+			entry=[time.ctime(currenttime),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP,myuuid]
 			fnSavetoLedger(entry,startdate)
 			time.sleep(currenttime+60-time.time())
 	except KeyboardInterrupt:
