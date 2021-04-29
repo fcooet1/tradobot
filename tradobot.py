@@ -51,7 +51,10 @@ def fnGetBalance(a):
 	for cur in rauth:
 		if str(cur['currencySymbol'])==a:
 			cash.append([str(cur['currencySymbol']),float(cur['available'])])
-	return cash
+	if len(cash)!=0:
+		return cash
+	else:
+		return [[a,0.0]]
 
 def fnPlaceOrder(direction,qty,price,uuid):
 	URL = 'https://api.bittrex.com/v3/orders'
@@ -194,14 +197,17 @@ def main():
 		print('Current available balance is:')
 		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
-		print('Use available %s? Y/N' %coina)
-		auxqstn=''
-		while auxqstn!=('y' or 'Y' or 'n' or 'N'):
-			auxqstn=str(input())
-			if auxqstn==('y' or 'Y'):
-				coinacash=float(fnGetBalance(coina)[-1][1])
-			if auxqstn==('n' or 'N'):
-				coinacash=0.0
+		if float(fnGetBalance(coina)[-1][1])>0.0:
+			print('Use available %s? Y/N' %coina)
+			auxqstn=''
+			while auxqstn!=('y' or 'Y' or 'n' or 'N'):
+				auxqstn=str(input())
+				if auxqstn==('y' or 'Y'):
+					coinacash=float(fnGetBalance(coina)[-1][1])
+				if auxqstn==('n' or 'N'):
+					coinacash=0.0
+		else:
+			coinacash=0.0
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		global maxtrad
 		maxtrad=float(input())
@@ -219,7 +225,9 @@ def main():
 	
 		coinbcash=auxcash
 		global startingpoint
-		startingpoint=USDTcash+coinacash*float(rj[-1]['low'])
+		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
+		rj=r.json()
+		startingpoint=coinbcash+coinacash*float(rj[-1]['low'])
 		startdate=int(time.time())
 		print('Press Ctrl+C anytime to stop the bot.')
 		print('A ledger file will be saved containing all session info. Check README to understand ledger data.')
