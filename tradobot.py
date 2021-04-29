@@ -7,8 +7,8 @@ def fnSavetoLedger(entry,startdate):
 	with open('ledger_'+str(startdate)+'.txt','a') as filehandle:
 		filehandle.write('%s\n' %entry)
 
-def fnGetLastOrder(uuid):
-	URL = 'https://api.bittrex.com/v3/orders/'+uuid
+def fnGetLastOrder(id):
+	URL = 'https://api.bittrex.com/v3/orders/'+id
 	method='GET'
 	timestamp = str(int(time.time()*1000))
 	requestbody = ''
@@ -20,14 +20,14 @@ def fnGetLastOrder(uuid):
 		print('Authentication failed. The progream will close.')
 		input()
 		exit()
-	while str(rauth.jason()[0]['clientOrderId'])!=uuid:
+	while str(rauth.json()[0]['clientOrderId'])!=id:
 		sleep(1)
 		timestamp = str(int(time.time()*1000))
 		presignature=timestamp+URL+method+ach
 		signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 		rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 		if str(rauth)!='<Response [200]>':
-			print('Authentication failed. The progream will close.')
+			print('Authentication failed while getting order info. The progream will close.')
 			input()
 			exit()
 	return [float(rauth.json()[0]['proceeds']),float(rauth.json()[0]['commission']),float(rauth.json()[0]['fillQuantity'])]		
@@ -43,42 +43,42 @@ def fnGetBalance(a):
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 	if str(rauth)!='<Response [200]>':
-		print('Authentication failed. The progream will close.')
+		print('Authentication failed while getting account balances. The progream will close.')
 		input()
 		exit()
 	rauth=rauth.json()
 	cash=[]
 	for cur in rauth:
-		if str(cur['currencySymbol'])==a:
+		if str(cur['currencySymbol'])==sym:
 			cash.append([str(cur['currencySymbol']),float(cur['available'])])
 	if len(cash)!=0:
 		return cash
 	else:
 		return [[a,0.0]]
 
-def fnPlaceOrder(direction,qty,price,uuid):
+def fnPlaceOrder(direction,qty,price):
 	URL = 'https://api.bittrex.com/v3/orders'
 	method='POST'
 	timestamp = str(int(time.time()*1000))
 	requestbody = {
-   	 "marketSymbol": str(coina)+"-"+str(coinb),
-   	 "direction": str(direction),
-    	"type":  "LIMIT",
-    	"quantity": str(qty),
-    	"limit": str(price),
-   	"timeInForce": "FILL_OR_KILL",
-	"clientOrderId": uuid
-	}
+ 	  	 "marketSymbol": str(coina)+"-"+str(coinb),
+ 	  	 "direction": str(direction),
+ 	   	"type":  "LIMIT",
+ 	   	"quantity": str(qty),
+  	  	"limit": str(price),
+   		"timeInForce": "FILL_OR_KILL",
+		}
 	ach = hashlib.sha512(bytes(json.dumps(requestbody),"utf-8")).hexdigest()
 	presignature=timestamp+URL+method+ach
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.post(URL,json=requestbody,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
-	if str(rauth)!=('<Response [201]>' or '<Response [409]>') :
-		print('Authentication failed. The progream will close.')
+	if str(rauth)==('<Response [201]>' or '<Response [409]>') :
+		return(str(rauth))
+	else:
+		print('Authentication failed while placing order. The progream will close.')
 		input()
 		exit()
-	return(str(rauth))
-
+		
 def fnFee():
 	URL = 'https://api.bittrex.com/v3/account/volume'
 	method='GET'
@@ -89,7 +89,7 @@ def fnFee():
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 	if str(rauth)!='<Response [200]>':
-		print('Authentication failed. The progream will close.')
+		print('Authentication failed while accesing account info. The progream will close.')
 		input()
 		exit()
 	rauth=rauth.json()
@@ -130,28 +130,27 @@ def fnDetectCue(a):
 			#Saucer Cue: Sell
 			return 1
 
-def fnBuy(m, p, i):
+def fnBuy(m, p):
 	g=m*(1-gfee)/p
-	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p,i)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
-		g=fnGetLastOrder(i)[2]
 		print('*****************************************************')
 		print("%s%.6f bought at $%.6f"%(coina,g, p))
-		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,fnGetLastOrder(i)[0],coinb,fnGetLastOrder(i)[1]))
+		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,m,coinb,m*gfee))
 		return g
 	else:
-		print("Server returned error %s. Transaction failed."%answer)
+		print("Server returned error 409 %s. Transaction failed."%answer)
 		return 0
-def fnSell(g, p, i):
-	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p,i) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
+def fnSell(g, p):
+	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
-		print("%s%.6f sold at $%.6f"%(coina,fnGetLastOrder(i)[2], p))
-		m=fnGetLastOrder(i)[0]-fnGetLastOrder(i)[1]
-		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-startingpoint,fnGetLastOrder(i)[1]))
+		print("%s%.6f sold at $%.6f"%(coina,g, p))
+		m=g*p*(1-gfee)
+		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-g*LP,g*p*gfee))
 		return m
 	else:
-		print("Server returned error %s. Transaction failed."%answer)
+		print("Server returned error 409 %s. Transaction failed."%answer)
 		return 0
 def main():
 	try:
@@ -176,12 +175,12 @@ def main():
 		global gfee
 		global LP
 		
-		coina='BTC' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
+		coina='DOGE' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 		coinb='USDT' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 		LP=float(0) #enter here the minimum price at which you want to sell available BTC. If you decide to not use available BTC leave it at 0.
 		
-		APIKEY= ''####YOUR APIKEY HERE####
-		APISECRET= ''####YOUR APISECRET HERE####
+		APIKEY= '50950ac95b6347aea4748e23e78decb6'####YOUR APIKEY HERE####
+		APISECRET= '79d9ae8ef14a4220b4c0e3767ff7475f'####YOUR APISECRET HERE####
 		
 		print()
 		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1.')
@@ -204,8 +203,10 @@ def main():
 				auxqstn=str(input())
 				if auxqstn==('y' or 'Y'):
 					coinacash=float(fnGetBalance(coina)[-1][1])
+					maxcoina=0.0
 				if auxqstn==('n' or 'N'):
 					coinacash=0.0
+					maxcoina=float(fnGetBalance(coina)[-1][1])
 		else:
 			coinacash=0.0
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
@@ -227,12 +228,12 @@ def main():
 		global startingpoint
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		rj=r.json()
-		startingpoint=coinbcash+coinacash*float(rj[-1]['low'])
+		startingpoint=coinbcash+coinacash*LP
+		print(str(startingpoint))
 		startdate=int(time.time())
 		print('Press Ctrl+C anytime to stop the bot.')
 		print('A ledger file will be saved containing all session info. Check README to understand ledger data.')
 		print()
-		
 		
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		rj=r.json()
@@ -263,34 +264,40 @@ def main():
 			AO.append(SMA5[-1]-SMA34[-1])
 			aux=fnDetectCue(AO)
 			opp='none'
-			myuuid='none'
 			if aux==1:
 				#Sell 
 				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
-					myuuid = str(uuid.uuid4())
-					coinbcash=fnSell(coinacash,pricelist[-1][1],myuuid)
-					if coinbcash>0:
-        					sessionfees.append(fnGetLastOrder(myuuid)[1])
-					LP=999999999999.9
-					coinacash=0#float(fnGetBalance(coina)[-1][1])
-					gfee=fnFee()
-					opp='sell'
-					sessionprofit+=coinbcash-startingpoint
-					coinbcash=maxtrad
+					auxsell=coinbcash
+					coinbcash=fnSell(coinacash,pricelist[-1][1])
+					if coinbcash==0:
+						coinbcash=auxsell
+					if coinbcash!=0:
+						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
+						sessionprofit+=coinbcash-coinacash*LP
+						LP=999999999999.9
+						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
+						gfee=fnFee()
+						opp='sell'
+						coinbcash=maxtrad
+					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 					print()	
 			if aux==0:
 				#Buy
 				if coinbcash>0:
-					myuuid = str(uuid.uuid4())
-					coinacash+=fnBuy(coinbcash,pricelist[-1][2],myuuid)
+					auxbuy=coinacash
+					coinacash=fnBuy(coinbcash,pricelist[-1][2])
+					if coincash==0:
+						coinacash=auxbuy
+						coinbcash=maxtrad
 					if coinacash>0:
-		        			sessionfees.append(fnGetLastOrder(myuuid)[1])
-					LP=pricelist[-1][2]
-					gfee=fnFee()
-					opp='buy'
-					coinbcash=0
+						sessionfees.append(coinbcash*gfee)
+						LP=pricelist[-1][2]
+						gfee=fnFee()
+						opp='buy'
+						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
+						coinbcash=0.0
 					print()
-			entry=[time.ctime(currenttime),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP,myuuid]
+			entry=[time.ctime(currenttime),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
 			fnSavetoLedger(entry,startdate)
 			time.sleep(currenttime+60-time.time())
 	except KeyboardInterrupt:
