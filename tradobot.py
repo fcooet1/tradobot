@@ -17,7 +17,7 @@ def fnGetLastOrder(id):
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 	if str(rauth)!='<Response [200]>':
-		print('Authentication failed. The progream will close.')
+		print('Authentication failed.'+str(rauth)+' The progream will close.')
 		input()
 		exit()
 	while str(rauth.json()[0]['clientOrderId'])!=id:
@@ -27,7 +27,7 @@ def fnGetLastOrder(id):
 		signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 		rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 		if str(rauth)!='<Response [200]>':
-			print('Authentication failed while getting order info. The progream will close.')
+			print('Authentication failed while getting order info.'+str(rauth)+' The progream will close.')
 			input()
 			exit()
 	return [float(rauth.json()[0]['proceeds']),float(rauth.json()[0]['commission']),float(rauth.json()[0]['fillQuantity'])]		
@@ -43,7 +43,7 @@ def fnGetBalance(a):
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 	if str(rauth)!='<Response [200]>':
-		print('Authentication failed while getting account balances. The progream will close.')
+		print('Authentication failed while getting account balances.'+str(rauth)+' The progream will close.')
 		input()
 		exit()
 	rauth=rauth.json()
@@ -75,7 +75,7 @@ def fnPlaceOrder(direction,qty,price):
 	if str(rauth)==('<Response [201]>' or '<Response [409]>') :
 		return(str(rauth))
 	else:
-		print('Authentication failed while placing order. The progream will close.')
+		print('Authentication failed while placing order.'+str(rauth)+' The progream will close.')
 		input()
 		exit()
 		
@@ -89,7 +89,7 @@ def fnFee():
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 	if str(rauth)!='<Response [200]>':
-		print('Authentication failed while accesing account info. The progream will close.')
+		print('Authentication failed while accesing account info.'+str(rauth)+' The progream will close.')
 		input()
 		exit()
 	rauth=rauth.json()
@@ -105,7 +105,7 @@ def fnFee():
 def fnGetSTXData(a, b):
 	r=requests.get('https://api.bittrex.com/v3/markets/'+a+'-'+b+'/ticker')
 	if str(r)!='<Response [200]>':
-		print('Server not responding. The progream will close.')
+		print('Server not responding.'+str(r)+'  The progream will close.')
 		input()
 		exit()
 	l=float(r.json()['bidRate'])
@@ -144,7 +144,7 @@ def fnBuy(m, p):
 		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,m,coinb,m*gfee))
 		return g
 	else:
-		print("Server returned error 409 %s. Transaction failed."%answer)
+		print("Server returned error %s. Transaction failed."%answer)
 		return 0
 	
 def fnSell(g, p):
@@ -156,7 +156,7 @@ def fnSell(g, p):
 		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-g*LP,g*p*gfee))
 		return m
 	else:
-		print("Server returned error 409 %s. Transaction failed."%answer)
+		print("Server returned error %s. Transaction failed."%answer)
 		return 0
 def main():
 	try:
@@ -181,12 +181,12 @@ def main():
 		global gfee
 		global LP
 		
-		coina='DOGE' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
-		coinb='USDT' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
+		coina='' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
+		coinb='' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 		LP=float(0) #enter here the minimum price at which you want to sell available BTC. If you decide to not use available BTC leave it at 0.
 		
-		APIKEY= '50950ac95b6347aea4748e23e78decb6'####YOUR APIKEY HERE####
-		APISECRET= '79d9ae8ef14a4220b4c0e3767ff7475f'####YOUR APISECRET HERE####
+		APIKEY= ''####YOUR APIKEY HERE####
+		APISECRET= ''####YOUR APISECRET HERE####
 		
 		print()
 		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1.')
