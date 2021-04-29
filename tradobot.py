@@ -8,7 +8,7 @@ def fnSavetoLedger(entry,startdate):
 		filehandle.write('%s\n' %entry)
 
 def fnGetLastOrder(id):
-	URL = 'https://api.bittrex.com/v3/orders/'+id
+	URL = 'https://api.bittrex.com/v3/orders/closed'
 	method='GET'
 	timestamp = str(int(time.time()*1000))
 	requestbody = ''
@@ -113,6 +113,11 @@ def fnGetSTXData(a, b):
 	return([int(time.time()), l, h])
 
 def fnDetectCue(a):
+	#Positive Peak
+	if len(a)>4:
+		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-4] and a[-1]<a[-2] and a[-2]<a[-3] and a[-3]>a[-4]:
+			#PP Cue: Sell
+			return 1
 	#Nough cross
 	if len(a)>1:
 		if a[-1]>0 and a[-2]<=0:
@@ -122,7 +127,7 @@ def fnDetectCue(a):
 			#NX Cue: Sell
 			return 1
 	#Saucers
-	if len(a)>2:
+	if len(a)>4:
 		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2] and a[-4]>a[-3]:
 			#Saucer Cue: Buy
 			return 0 
@@ -141,6 +146,7 @@ def fnBuy(m, p):
 	else:
 		print("Server returned error 409 %s. Transaction failed."%answer)
 		return 0
+	
 def fnSell(g, p):
 	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
@@ -213,23 +219,17 @@ def main():
 		global maxtrad
 		maxtrad=float(input())
 		while maxtrad>=float(fnGetBalance(coinb)[-1][1]):
-			
 			print('Insuficient funds.')
-			maxtrad=float(input())
-				
+			maxtrad=float(input())	
 		print('Input %s amount to start trading with.' %coinb)
 		auxcash=float(input())
 		while auxcash>=float(fnGetBalance(coinb)[-1][1]):
-
 			print('Insuficient funds.')
 			auxcash=float(input())
-	
 		coinbcash=auxcash
 		global startingpoint
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		rj=r.json()
-		startingpoint=coinbcash+coinacash*LP
-		print(str(startingpoint))
 		startdate=int(time.time())
 		print('Press Ctrl+C anytime to stop the bot.')
 		print('A ledger file will be saved containing all session info. Check README to understand ledger data.')
@@ -253,7 +253,6 @@ def main():
 		print("Tradobot will now wait for market Cues each passing minute. Transactions will be displayed when made.")
 		print()
 
-
 		while True:
 			currenttime=int(time.time())
 			pricelist.append(fnGetSTXData(coina, coinb))
@@ -264,8 +263,7 @@ def main():
 			AO.append(SMA5[-1]-SMA34[-1])
 			aux=fnDetectCue(AO)
 			opp='none'
-			if aux==1:
-				#Sell 
+			if aux==1:#Sell
 				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
 					auxsell=coinbcash
 					coinbcash=fnSell(coinacash,pricelist[-1][1])
@@ -281,8 +279,7 @@ def main():
 						coinbcash=maxtrad
 					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 					print()	
-			if aux==0:
-				#Buy
+			if aux==0:#Buy
 				if coinbcash>0:
 					auxbuy=coinacash
 					coinacash=fnBuy(coinbcash,pricelist[-1][2])
@@ -306,14 +303,11 @@ def main():
 		print()
 		print("%d transactions were made and %s%.6f was paid for fees" %(len(sessionfees),coinb, sum(sessionfees)))
 		print("This session's profit was: %s%.8f" %(coinb,sessionprofit))
+		print()
 		print('End of session available balance is:')
 		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
-		print('Check Bittrex account open orders if coins are missing.')
-
-##################################################
-#######       Program Inizialization       #######
-##################################################
+		print()
 
 if __name__=="__main__":
 	main()
