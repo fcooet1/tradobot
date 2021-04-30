@@ -27,7 +27,7 @@ def fnGetLastOrder(id):
 		signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 		rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 		if str(rauth)!='<Response [200]>':
-			print('Authentication failed while getting order info.'+str(rauth)+' The progream will close.')
+			print('Authentication failed while getting order info ('+str(rauth)+'). The progream will close.')
 			input()
 			exit()
 	return [float(rauth.json()[0]['proceeds']),float(rauth.json()[0]['commission']),float(rauth.json()[0]['fillQuantity'])]		
@@ -43,7 +43,7 @@ def fnGetBalance(a):
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 	if str(rauth)!='<Response [200]>':
-		print('Authentication failed while getting account balances.'+str(rauth)+' The progream will close.')
+		print('Authentication failed while getting account balances ('+str(rauth)+'). The progream will close.')
 		input()
 		exit()
 	rauth=rauth.json()
@@ -75,7 +75,7 @@ def fnPlaceOrder(direction,qty,price):
 	if str(rauth)==('<Response [201]>' or '<Response [409]>') :
 		return(str(rauth))
 	else:
-		print('Authentication failed while placing order.'+str(rauth)+' The progream will close.')
+		print('Authentication failed while placing order ('+str(rauth)+'). The progream will close.')
 		input()
 		exit()
 		
@@ -89,7 +89,7 @@ def fnFee():
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
 	if str(rauth)!='<Response [200]>':
-		print('Authentication failed while accesing account info.'+str(rauth)+' The progream will close.')
+		print('Authentication failed while accesing account info ('+str(rauth)+'). The progream will close.')
 		input()
 		exit()
 	rauth=rauth.json()
@@ -105,7 +105,7 @@ def fnFee():
 def fnGetSTXData(a, b):
 	r=requests.get('https://api.bittrex.com/v3/markets/'+a+'-'+b+'/ticker')
 	if str(r)!='<Response [200]>':
-		print('Server not responding.'+str(r)+'  The progream will close.')
+		print('Server not responding ('+str(r)+'). The progream will close.')
 		input()
 		exit()
 	l=float(r.json()['bidRate'])
@@ -141,7 +141,7 @@ def fnBuy(m, p):
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f bought at $%.6f"%(coina,g, p))
-		print("Amount spent on transaction was %s%.6f + a %s%.6f fee" %(coinb,m,coinb,m*gfee))
+		print("Amount spent on transaction was %s%.6f + a %s%.6f fee." %(coinb,g*p,coinb,m*gfee))
 		return g
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -153,7 +153,7 @@ def fnSell(g, p):
 		print('*****************************************************')
 		print("%s%.6f sold at $%.6f"%(coina,g, p))
 		m=g*p*(1-gfee)
-		print("Transaction profit was %s%.6f (%.6f fee was paid)" %(coinb,m-g*LP,g*p*gfee))
+		print("Transaction profit was %s%.6f (%.6f fee was paid)." %(coinb,m-g*LP,g*p*gfee))
 		return m
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -234,8 +234,6 @@ def main():
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		rj=r.json()
 		startdate=int(time.time())
-		print('Press Ctrl+C anytime to stop the bot.')
-		print('A ledger file will be saved containing all session info. Check README to understand ledger data.')
 		print()
 		
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
@@ -253,11 +251,15 @@ def main():
 			sys.stdout.flush()
 		print()
 		print()
-		print("Tradobot will now wait for market Cues each passing minute. Transactions will be displayed when made.")
+		print("Tradobot will now wait for market Cues each passing minute.")
+		print("Transactions will be displayed when made.")
+		print('Press Ctrl+C anytime to stop the bot.')
+		print('A ledger file will be saved containing all session info.')
+		print('Check README to understand ledger data.')
 		print()
 
 		while True:
-			currenttime=int(time.time())
+			currenttime=time.time()
 			pricelist.append(fnGetSTXData(coina, coinb))
 			print(str(pricelist[-1]))
 			mid.append((pricelist[-1][2]+pricelist[-1][1]/2))
@@ -272,7 +274,7 @@ def main():
 					coinbcash=fnSell(coinacash,pricelist[-1][1])
 					if coinbcash==0:
 						coinbcash=auxsell
-					if coinbcash!=0:
+					if coinbcash>0:
 						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 						sessionprofit+=coinbcash-coinacash*LP
 						LP=999999999999.9
@@ -286,7 +288,7 @@ def main():
 				if coinbcash>0:
 					auxbuy=coinacash
 					coinacash=fnBuy(coinbcash,pricelist[-1][2])
-					if coincash==0:
+					if coinacash==0:
 						coinacash=auxbuy
 						coinbcash=maxtrad
 					if coinacash>0:
@@ -297,7 +299,7 @@ def main():
 						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						coinbcash=0.0
 					print()
-			entry=[time.strftime('%d/%m/%y %H:%M:%S',time.localtime(currenttime)),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
+			entry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
 			fnSavetoLedger(entry,startdate)
 			time.sleep(currenttime+60-time.time())
 	except KeyboardInterrupt:
