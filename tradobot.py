@@ -182,7 +182,8 @@ def main():
 		global LP
 		
 		coina='' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
-		coinb='' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
+		coinb='' 
+		
 		LP=float(0) #enter here the minimum price at which you want to sell available BTC. If you decide to not use available BTC leave it at 0.
 		
 		APIKEY= ''####YOUR APIKEY HERE####
@@ -195,10 +196,14 @@ def main():
 			print("APIKEY or APISECRET are missing. The program will end.")
 			input()
 			exit()
+		if coina=='' or coinb=='':
+			print("Coin MArket definitions are missing. The program will end.")
+			input()
+			exit()
 		gfee=fnFee()
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		rj=r.json()
-		print('Current price is %.6f %s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
+		print('Current market is at %.6f %s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
 		print('Current available balance is:')
 		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
@@ -215,12 +220,10 @@ def main():
 					maxcoina=float(fnGetBalance(coina)[-1][1])
 		else:
 			coinacash=0.0
+			maxcoina=0.0
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		global maxtrad
 		maxtrad=float(input())
-		while maxtrad>=float(fnGetBalance(coinb)[-1][1]):
-			print('Insuficient funds.')
-			maxtrad=float(input())	
 		print('Input %s amount to start trading with.' %coinb)
 		auxcash=float(input())
 		while auxcash>=float(fnGetBalance(coinb)[-1][1]):
@@ -276,7 +279,7 @@ def main():
 						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						gfee=fnFee()
 						opp='sell'
-						coinbcash=maxtrad
+						coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
 					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 					print()	
 			if aux==0:#Buy
@@ -294,7 +297,7 @@ def main():
 						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						coinbcash=0.0
 					print()
-			entry=[time.ctime(currenttime),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
+			entry=[time.strftime('%d/%m/%y %H:%M:%S',time.localtime(currenttime)),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
 			fnSavetoLedger(entry,startdate)
 			time.sleep(currenttime+60-time.time())
 	except KeyboardInterrupt:
