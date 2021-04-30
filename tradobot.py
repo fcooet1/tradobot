@@ -115,7 +115,7 @@ def fnGetSTXData(a, b):
 def fnDetectCue(a):
 	#Positive Peak
 	if len(a)>4:
-		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-4] and a[-1]<a[-2] and a[-2]<a[-3] and a[-3]>a[-4]:
+		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-4]>0 and a[-1]<a[-2] and a[-2]<a[-3] and a[-3]>a[-4]:
 			#PP Cue: Sell
 			return 1
 	#Nough cross
