@@ -102,8 +102,8 @@ def fnFee():
 			fee=float(bittrexcommision[i][1])
 	return fee
 
-def fnGetSTXData(a, b):
-	r=requests.get('https://api.bittrex.com/v3/markets/'+a+'-'+b+'/ticker')
+def fnGetSTXData():
+	r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/ticker')
 	if str(r)!='<Response [200]>':
 		print('Server not responding ('+str(r)+'). The progream will close.')
 		input()
@@ -162,19 +162,13 @@ def main():
 	try:
 		global pricelist
 		pricelist=[]
-		global mid
 		mid=[]
-		global SMA5
 		SMA5=[]
-		global SMA34
 		SMA34=[]
-		global AO
 		AO=[]
 		global coina
 		global coinb
-		global sessionfees
 		sessionfees=[]
-		global sessionprofit
 		sessionprofit=0.0
 		global APIKEY
 		global APISECRET
@@ -197,7 +191,7 @@ def main():
 			input()
 			exit()
 		if coina=='' or coinb=='':
-			print("Coin MArket definitions are missing. The program will end.")
+			print("Coin Market definitions are missing. The program will end.")
 			input()
 			exit()
 		gfee=fnFee()
@@ -222,7 +216,6 @@ def main():
 			coinacash=0.0
 			maxcoina=0.0
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
-		global maxtrad
 		maxtrad=float(input())
 		print('Input %s amount to start trading with.' %coinb)
 		auxcash=float(input())
@@ -230,12 +223,8 @@ def main():
 			print('Insuficient funds.')
 			auxcash=float(input())
 		coinbcash=auxcash
-		global startingpoint
-		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
-		rj=r.json()
 		startdate=int(time.time())
 		print()
-		
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		rj=r.json()
 		for tik in rj:
@@ -260,9 +249,9 @@ def main():
 
 		while True:
 			currenttime=time.time()
-			pricelist.append(fnGetSTXData(coina, coinb))
+			pricelist.append(fnGetSTXData())
 			print(str(pricelist[-1]))
-			mid.append((pricelist[-1][2]+pricelist[-1][1]/2))
+			mid.append((pricelist[-1][2]+pricelist[-1][1])/2)
 			SMA5.append(sum(mid[-5:])/5)
 			SMA34.append(sum(mid[-34:])/34)
 			AO.append(SMA5[-1]-SMA34[-1])
