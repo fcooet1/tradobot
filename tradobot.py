@@ -230,7 +230,7 @@ def main():
 		for tik in rj:
 			rjt=[int(time.time()),float(tik['low']),float(tik['high'])]
 			pricelist.append(rjt)
-			mid.append((pricelist[-1][2]+pricelist[-1][1]/2))
+			mid.append(((pricelist[-1][2]+pricelist[-1][1])/2))
 			if len(mid)>=5:
 				SMA5.append(sum(mid[-5:])/5)
 			if len(mid)>=34:
