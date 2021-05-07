@@ -136,12 +136,12 @@ def fnDetectCue(a):
 			return 1
 
 def fnBuy(m, p):
-	g=m*(1-gfee)/p
+	g=m/((1+gfee)*p)
 	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
 		print('*****************************************************')
 		print("%s%.6f bought at $%.6f"%(coina,g, p))
-		print("Amount spent on transaction was %s%.6f + a %s%.6f fee." %(coinb,g*p,coinb,m*gfee))
+		print("Amount spent on transaction was %s%.6f + a %s%.6f fee." %(coinb,g*p,coinb,g*p*gfee))
 		return g
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
@@ -285,7 +285,7 @@ def main():
 						coinacash=auxbuy
 						coinbcash=maxtrad
 					if coinacash>0:
-						sessionfees.append(coinbcash*gfee)
+						sessionfees.append((coinbcash*gfee)/(1+gfee))
 						LP=pricelist[-1][2]
 						gfee=fnFee()
 						opp='buy'
@@ -294,7 +294,23 @@ def main():
 					print()
 			entry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
 			fnSavetoLedger(entry,startdate)
-			time.sleep(currenttime+60-time.time())
+			
+			if currenttime+60>time.time():
+				time.sleep(currenttime+60-time.time())
+			else:
+				r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
+				rj=r.json()
+				for tik in rj:
+					sys.stdout.write("\rRebuilding oscilator " +str(round(100*len(pricelist)/len(rj)))+'%')
+					rjt=[int(time.time()),float(tik['low']),float(tik['high'])]
+					pricelist.append(rjt)
+					mid.append(((pricelist[-1][2]+pricelist[-1][1])/2))
+					if len(mid)>=5:
+						SMA5.append(sum(mid[-5:])/5)
+					if len(mid)>=34:
+						SMA34.append(sum(mid[-34:])/34)
+						AO.append(SMA5[-1]-SMA34[-1])
+					sys.stdout.flush()
 	except KeyboardInterrupt:
 		print()
 		print('TRADOBOT has stoped')
