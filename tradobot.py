@@ -196,6 +196,10 @@ def main():
 			exit()
 		gfee=fnFee()
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
+		if str(rj)!='<Response [200]>':
+			print("Market doesn't exist. ("+str(rauth)+'). The progream will close.')
+			input()
+			exit()
 		rj=r.json()
 		print('Current market is at %.6f %s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
 		print('Current available balance is:')
