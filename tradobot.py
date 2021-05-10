@@ -267,7 +267,7 @@ def main():
 				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
 					auxsell=coinbcash
-					counter =0
+					counter=0
 					coinbcash=fnSell(coinacash,pricelist[-1][1])
 					while coinbcash==0 and counter<10:
 						coinbcash=auxsell
@@ -278,7 +278,7 @@ def main():
 						counter+=1
 					if coinbcash>0:
 						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
-						sessionprofit+=coinbcash-coinacash*LP
+						sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 						LP=999999999999.9
 						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						gfee=fnFee()
