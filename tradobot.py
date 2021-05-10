@@ -136,10 +136,10 @@ def fnDetectCue(a):
 			return 1
 
 def fnBuy(m, p):
+	print('**********************BUY ORDER**********************')      
 	g=m/((1+gfee)*p)
 	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
-		print('*****************************************************')
 		print("%s%.6f bought at $%.6f"%(coina,g, p))
 		print("Amount spent on transaction was %s%.6f + a %s%.6f fee." %(coinb,g*p,coinb,g*p*gfee))
 		return g
@@ -148,9 +148,9 @@ def fnBuy(m, p):
 		return 0
 	
 def fnSell(g, p):
+	print('**********************SELL ORDER**********************')
 	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
-		print('*****************************************************')
 		print("%s%.6f sold at $%.6f"%(coina,g, p))
 		m=g*p*(1-gfee)
 		print("Transaction profit was %s%.6f (%.6f fee was paid)." %(coinb,m-g*LP,g*p*gfee))
@@ -264,9 +264,15 @@ def main():
 			if aux==1:#Sell
 				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
 					auxsell=coinbcash
+					counter =0
 					coinbcash=fnSell(coinacash,pricelist[-1][1])
-					if coinbcash==0:
+					while coinbcash==0 and counter<10:
 						coinbcash=auxsell
+						print("Attempting to place order again.[%d]" %(counter+1))
+						coinbcash=fnSell(coinacash,pricelist[-1][1])
+						time.sleep(1)
+						opp='sell-failed'
+						counter+=1
 					if coinbcash>0:
 						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 						sessionprofit+=coinbcash-coinacash*LP
@@ -284,6 +290,7 @@ def main():
 					if coinacash==0:
 						coinacash=auxbuy
 						coinbcash=maxtrad
+						opp='buy-failed'
 					if coinacash>0:
 						sessionfees.append((coinbcash*gfee)/(1+gfee))
 						LP=pricelist[-1][2]
