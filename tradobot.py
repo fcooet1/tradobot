@@ -186,6 +186,7 @@ def main():
 		print()
 		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1.')
 		print('This bot uses Bill Williams Momentum strategy to trade automatically.')
+		print()
 		if APIKEY=='' or APISECRET=='':
 			print("APIKEY or APISECRET are missing. The program will end.")
 			input()
@@ -219,6 +220,7 @@ def main():
 		else:
 			coinacash=0.0
 			maxcoina=0.0
+		print('At this moment your commision rate is %.3f %' %(gfee*100))
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		maxtrad=float(input())
 		print('Input %s amount to start trading with.' %coinb)
