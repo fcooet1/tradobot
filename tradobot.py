@@ -196,7 +196,7 @@ def main():
 			exit()
 		gfee=fnFee()
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
-		if str(rj)!='<Response [200]>':
+		if str(r)!='<Response [200]>':
 			print("Market doesn't exist. ("+str(rauth)+'). The progream will close.')
 			input()
 			exit()
