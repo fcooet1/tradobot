@@ -264,6 +264,7 @@ def main():
 			aux=fnDetectCue(AO)
 			opp='none'
 			if aux==1:#Sell
+				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
 					auxsell=coinbcash
 					counter =0
