@@ -153,7 +153,7 @@ def fnSell(g, p):
 	if answer=='<Response [201]>':
 		print("%s%.6f sold at $%.6f"%(coina,g, p))
 		m=g*p*(1-gfee)
-		print("Transaction profit was %s%.6f (%.6f fee was paid)." %(coinb,m-g*LP,g*p*gfee))
+		print("Transaction profit was %s%.6f (%.6f fee was paid)." %(coinb,m-g*(LP+p*gfee),g*p*gfee))
 		return m
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
