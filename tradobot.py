@@ -311,7 +311,7 @@ def main():
 				r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 				rj=r.json()
 				for tik in rj:
-					sys.stdout.write("\rRebuilding oscilator " +str(round(100*len(pricelist)/len(rj)))+'%')
+					sys.stdout.write("\rRebuilding oscilator " +str(round(100*rj.index(tik)/len(rj)))+'%')
 					rjt=[int(time.time()),float(tik['low']),float(tik['high'])]
 					pricelist.append(rjt)
 					mid.append(((pricelist[-1][2]+pricelist[-1][1])/2))
@@ -321,6 +321,7 @@ def main():
 						SMA34.append(sum(mid[-34:])/34)
 						AO.append(SMA5[-1]-SMA34[-1])
 					sys.stdout.flush()
+				print()
 	except KeyboardInterrupt:
 		print()
 		print('TRADOBOT has stoped')
