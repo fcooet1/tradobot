@@ -72,7 +72,7 @@ def fnPlaceOrder(direction,qty,price):
 	presignature=timestamp+URL+method+ach
 	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
 	rauth=requests.post(URL,json=requestbody,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
-	if str(rauth)==('<Response [201]>' or '<Response [409]>') :
+	if str(rauth)=='<Response [201]>' or str(rauth)=='<Response [409]>':
 		return(str(rauth))
 	else:
 		print('Authentication failed while placing order ('+str(rauth)+'). The progream will close.')
@@ -108,9 +108,7 @@ def fnGetSTXData():
 		print('Server not responding ('+str(r)+'). The progream will close.')
 		input()
 		exit()
-	l=float(r.json()['bidRate'])
-	h=float(r.json()['askRate'])
-	return([int(time.time()), l, h])
+	return([int(time.time()), float(r.json()['bidRate']), float(r.json()['askRate'])])
 
 def fnDetectCue(a):
 	#Positive Peak
@@ -273,7 +271,7 @@ def main():
 					while coinbcash==0 and counter<10:
 						coinbcash=auxsell
 						print("Attempting to place order again.[%d]" %(counter+1))
-						coinbcash=fnSell(coinacash,pricelist[-1][1])
+						coinbcash=fnSell(coinacash,fnGetSTXData()[1])
 						time.sleep(1)
 						opp='sell-failed'
 						counter+=1
