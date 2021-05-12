@@ -164,10 +164,11 @@ def main():
 		SMA5=[]
 		SMA34=[]
 		AO=[]
-		global coina
-		global coinb
 		sessionfees=[]
 		sessionprofit=0.0
+		
+		global coina
+		global coinb
 		global APIKEY
 		global APISECRET
 		global gfee
@@ -193,7 +194,6 @@ def main():
 			print("Coin Market definitions are missing. The program will end.")
 			input()
 			exit()
-		gfee=fnFee()
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		if str(r)!='<Response [200]>':
 			print("Market doesn't exist. ("+str(rauth)+'). The progream will close.')
@@ -218,6 +218,7 @@ def main():
 		else:
 			coinacash=0.0
 			maxcoina=0.0
+		gfee=fnFee()
 		print('At this moment your commision rate is %.3f %' %(gfee*100))
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		maxtrad=float(input())
