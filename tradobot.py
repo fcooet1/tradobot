@@ -264,6 +264,7 @@ def main():
 			aux=fnDetectCue(AO)
 			opp='none'
 			if aux==1:#Sell
+				gfee=fnFee()
 				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
 					auxsell=coinbcash
@@ -281,12 +282,12 @@ def main():
 						sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 						LP=999999999999.9
 						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
-						gfee=fnFee()
 						opp='sell'
 						coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
 					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 					print()	
 			if aux==0:#Buy
+				gfee=fnFee()
 				if coinbcash>0:
 					auxbuy=coinacash
 					coinacash=fnBuy(coinbcash,pricelist[-1][2])
@@ -297,7 +298,6 @@ def main():
 					if coinacash>0:
 						sessionfees.append((coinbcash*gfee)/(1+gfee))
 						LP=pricelist[-1][2]
-						gfee=fnFee()
 						opp='buy'
 						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						coinbcash=0.0
