@@ -267,7 +267,7 @@ def main():
 			AO.append(SMA5[-1]-SMA34[-1])
 			aux=fnDetectCue(AO)
 			opp='none'
-			if (1-stoploss)*LP<=pricelist[-1][1] and coinacash>0:#STOP-LOSS
+			if (1-stoploss)*LP<=pricelist[-1][1] and coinacash>0 and AO[-1]<0:#STOP-LOSS
 				gfee=fnFee()
 				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 				auxsell=coinbcash
