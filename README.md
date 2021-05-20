@@ -20,6 +20,13 @@ If your coina balance is positive and you want to use it to trade during this se
 LP=float(0) #enter here the minimum price at which you want to sell available coina.
             #If you decide to not use available coina leave it at 0.
 ```
+
+A Stop-Loss can be set as a negative % variation of the buy price. It is set by default at 15% and can be modified by changing the value of the variable:
+```bash
+stoploss=0.15 
+```
+This means that if the price of your asset drops by 15% the program will place a sell order at current price, to prevent possible further losses.
+
 For safety reasons, fnBuy and fnSell, the functions in charge of placing orders on Bittrex system are not activated by default. To activate them modify the code within them as follows:
 Within fnBuy:
 ```bash
