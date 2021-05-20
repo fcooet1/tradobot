@@ -219,7 +219,11 @@ def main():
 			coinacash=0.0
 			maxcoina=0.0
 		gfee=fnFee()
-		print('At this moment your commision rate is %.3f %' %(gfee*100))
+		print('At this moment your commision rate is %.3f%' %(gfee*100))
+		
+		stoploss = 0.15
+		print("A stop-loss is set at -%d% of buy price." %(stoploss*100)
+		      
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		maxtrad=float(input())
 		print('Input %s amount to start trading with.' %coinb)
@@ -244,6 +248,7 @@ def main():
 			sys.stdout.write("\rInitializing " +str(round(100*len(pricelist)/len(rj)))+'%')
 			sys.stdout.flush()
 		print()
+		
 		print()
 		print("Tradobot will now wait for market Cues each passing minute.")
 		print("Transactions will be displayed when made.")
@@ -262,6 +267,29 @@ def main():
 			AO.append(SMA5[-1]-SMA34[-1])
 			aux=fnDetectCue(AO)
 			opp='none'
+			if (1-stoploss)*LP<=pricelist[-1][1] and coinacash>0:#STOP-LOSS
+				gfee=fnFee()
+				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
+				auxsell=coinbcash
+				counter=0
+				print('**********************STOP--LOSS**********************')
+				coinbcash=fnSell(coinacash,pricelist[-1][1])
+				while coinbcash==0 and counter<10:
+					coinbcash=auxsell
+					print("Attempting to place order again.[%d]" %(counter+1))
+					coinbcash=fnSell(coinacash,fnGetSTXData()[1])
+					time.sleep(1)
+					opp='SL-failed'
+					counter+=1
+				if coinbcash>0:
+					sessionfees.append(coinacash*pricelist[-1][1]*gfee)
+					sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
+					LP=999999999999.9
+					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
+					opp='SL'
+					coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
+				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
+				print()	
 			if aux==1:#Sell
 				gfee=fnFee()
 				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
