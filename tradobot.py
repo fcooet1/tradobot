@@ -219,10 +219,10 @@ def main():
 			coinacash=0.0
 			maxcoina=0.0
 		gfee=fnFee()
-		print('At this moment your commision rate is %.3f%' %(gfee*100))
+		print('At this moment your commision rate is '+str(gfee*100)+"%")
 		
 		stoploss = 0.15
-		print("A stop-loss is set at -%d% of buy price." %(stoploss*100)
+		print("A stop-loss is set at "+str(stoploss*100)+"% of buy price.")
 		      
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		maxtrad=float(input())
