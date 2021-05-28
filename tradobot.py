@@ -207,7 +207,7 @@ def main():
 		if float(fnGetBalance(coina)[-1][1])>0.0:
 			print('Use available %s? Y/N' %coina)
 			auxqstn=''
-			while auxqstn!=('y' or 'Y' or 'n' or 'N'):
+			while auxqstn!=('y' and 'Y' and 'n' and 'N'):
 				auxqstn=str(input())
 				if auxqstn==('y' or 'Y'):
 					coinacash=float(fnGetBalance(coina)[-1][1])
