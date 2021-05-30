@@ -320,7 +320,7 @@ def main():
 					coinacash=fnBuy(coinbcash,pricelist[-1][2])
 					if coinacash==0:
 						coinacash=auxbuy
-						coinbcash=maxtrad
+						coinbcash=min(coinbcash,maxtrad)
 						opp='buy-failed'
 					if coinacash>0:
 						sessionfees.append((coinbcash*gfee)/(1+gfee))
