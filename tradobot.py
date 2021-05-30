@@ -284,7 +284,7 @@ def main():
 				if coinbcash>0:
 					sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 					sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
-					LP=999999999999.9
+					LP=0.0
 					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 					opp='SL'
 					coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
@@ -307,7 +307,7 @@ def main():
 					if coinbcash>0:
 						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 						sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
-						LP=999999999999.9
+						LP=0.0
 						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						opp='sell'
 						coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
