@@ -196,12 +196,12 @@ def main():
 			exit()
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		if str(r)!='<Response [200]>':
-			print("Market doesn't exist. ("+str(rauth)+'). The progream will close.')
+			print("Selected market unavailable. ("+str(rauth)+'). The progream will close.')
 			input()
 			exit()
 		rj=r.json()
-		print('Current market is at %.6f %s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
-		print('Current available balance is:')
+		print('Current market is at %.6f%s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
+		print('Available account balance is:')
 		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
 		if float(fnGetBalance(coina)[-1][1])>0.0:
@@ -254,7 +254,6 @@ def main():
 		print("Transactions will be displayed when made.")
 		print('Press Ctrl+C anytime to stop the bot.')
 		print('A ledger file will be saved containing all session info.')
-		print('Check README to understand ledger data.')
 		print()
 
 		while True:
@@ -330,7 +329,7 @@ def main():
 						coinbcash=0.0
 					print()
 			entry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
-			fnSavetoLedger(entry,startdate)
+			fnSavetoLedger(str(entry).replace("'","").replace("[","").replace("]",""),startdate)
 			
 			if currenttime+60>time.time():
 				time.sleep(currenttime+60-time.time())
