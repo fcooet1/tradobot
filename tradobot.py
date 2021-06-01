@@ -280,7 +280,7 @@ def main():
 					time.sleep(1)
 					opp='SL-failed'
 					counter+=1
-				if coinbcash>0:
+				if coinbcash>0 and opp!='sell-failed':
 					sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 					sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 					LP=0.0
@@ -302,7 +302,7 @@ def main():
 						time.sleep(1)
 						opp='sell-failed'
 						counter+=1
-					if coinbcash>0:
+					if coinbcash>0 and opp!='sell-failed':
 						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 						sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 						LP=0.0
@@ -319,7 +319,7 @@ def main():
 						coinacash=auxbuy
 						coinbcash=min(coinbcash,maxtrad)
 						opp='buy-failed'
-					if coinacash>0:
+					if coinacash>0 and opp!='buy-failed':
 						sessionfees.append((coinbcash*gfee)/(1+gfee))
 						LP=pricelist[-1][2]
 						opp='buy'
