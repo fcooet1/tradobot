@@ -118,9 +118,9 @@ def fnDetectCue(a):
 			return 1
 	#Nough cross
 	if len(a)>1:
-		if a[-1]>0 and a[-2]<=0:
+		#if a[-1]>0 and a[-2]<=0:    ###Delete Comments to activate this Cue. Strategy will turn less conservative.
 			#NX Cue: Buy
-			return 0
+			#return 0
 		if a[-1]<0 and a[-2]>=0:
 			#NX Cue: Sell
 			return 1
@@ -284,7 +284,6 @@ def main():
 					sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 					sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 					LP=0.0
-					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 					opp='SL'
 					coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
 				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
@@ -292,7 +291,7 @@ def main():
 			if aux==1:#Sell
 				gfee=fnFee()
 				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
-				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0:
+				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0 and LP!=0:
 					auxsell=coinbcash
 					counter=0
 					coinbcash=fnSell(coinacash,pricelist[-1][1])
@@ -307,7 +306,6 @@ def main():
 						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 						sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 						LP=0.0
-						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						opp='sell'
 						coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
 					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
