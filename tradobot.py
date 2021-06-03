@@ -280,7 +280,7 @@ def main():
 					time.sleep(1)
 					opp='SL-failed'
 					counter+=1
-				if coinbcash>0 and opp!='sell-failed':
+				if coinbcash>0 and opp!='SL-failed':
 					sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 					sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 					LP=0.0
