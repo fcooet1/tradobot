@@ -50,8 +50,8 @@ answer=fnPlaceOrder('SELL',g,p,i)
 Now you should be ready to go. Run the code using your favourite compiler.
 As you run the program, it will try to authenticate. If it fails you'll be noticed and the program will shut down. You'll need to check your APIKEY and APISECRET values. If they are correct, you should get information of the current buy price of the selected market and your available funds.
 The program will ask if you want to use your available balance of coina. Input Y for Yes or N for No.
-Then it will ask for the maximum amount of coinb you'll allow it to get from your account during this session. Input the value as int or float. This value cannot be larger than your current available balance.
-Finally it'll ask you to input the amount you wish to start with. Input as int or float. This value, as well, cannot be larger than your current available balance.
+Then it will ask for the maximum amount of coinb you'll allow it to get from your account during this session. Input the value as int or float.
+Finally it'll ask you to input the amount you wish to start with. Input as int or float. This value cannot be larger than your current available balance.
 Once you enter this input, the program will start runnung. It'll get market data from Bittrex each minute and diplay it in the console in this format:
 ```bash
 [currentUNIXepoch,priceLow,priceHigh]
