@@ -274,13 +274,13 @@ def main():
 				print('**********************STOP--LOSS**********************')
 				coinbcash=fnSell(coinacash,pricelist[-1][1])
 				while coinbcash==0 and counter<10:
+					opp='SL-failed'
 					coinbcash=auxsell
 					print("Attempting to place order again.[%d]" %(counter+1))
 					coinbcash=fnSell(coinacash,fnGetSTXData()[1])
 					time.sleep(1)
-					opp='SL-failed'
 					counter+=1
-				if coinbcash>0 and opp!='SL-failed':
+				if coinbcash>0 and counter!=10:
 					sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 					sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 					LP=0.0
@@ -296,13 +296,13 @@ def main():
 					counter=0
 					coinbcash=fnSell(coinacash,pricelist[-1][1])
 					while coinbcash==0 and counter<10:
+						opp='sell-failed'
 						coinbcash=auxsell
 						print("Attempting to place order again.[%d]" %(counter+1))
 						coinbcash=fnSell(coinacash,fnGetSTXData()[1])
 						time.sleep(1)
-						opp='sell-failed'
 						counter+=1
-					if coinbcash>0 and opp!='sell-failed':
+					if coinbcash>0 and counter!=10:
 						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
 						sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
 						LP=0.0
