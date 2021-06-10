@@ -327,7 +327,7 @@ def main():
 						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						coinbcash=0.0
 					print()
-			entry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP]
+			entry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP,gfee]
 			fnSavetoLedger(str(entry).replace("'","").replace("[","").replace("]",""),startdate)
 			
 			if currenttime+60>time.time():
