@@ -15,11 +15,7 @@ Define which coins you want this session to trade (for example, for BTC-USDT, as
 coina='BTC' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 coinb='USDT' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 ```
-If your coina balance is positive and you want to use it to trade during this session, you can define a minimum price for the bot to start selling at:
-```bash
-LP=float(0) #enter here the minimum price at which you want to sell available coina.
-            #If you decide to not use available coina leave it at 0.
-```
+If your coina balance is positive and you want to use it to trade during this session, you'll be asked through the console for the minimum price for the bot to start selling at.
 
 A Stop-Loss can be set as a negative % variation of the buy price. It is set by default at 15% and can be modified by changing the value of the variable:
 ```bash
@@ -56,13 +52,22 @@ Once you enter this input, the program will start runnung. It'll get market data
 ```bash
 [currentUNIXepoch,priceLow,priceHigh]
 ```
-Whenever the transaction criteria are filled, the Buy or Sell function will be executed. Buy orders are filled using 100% of the asigned coinb value. Sell orders will be executed only when the price is above the last Buy price or the price asigned to the LP variable. This takes Bittrex comission into account, so Sell orders will always profit.
+Whenever the transaction criteria are filled, the Buy or Sell function will be executed. Buy orders are filled using 100% of the asigned coinb value. Sell orders will be executed only when the current market price is above the price spent for particular amount of assets. This takes Bittrex comission into account, so Sell orders will always profit.
 A summary of each transaction will be displayed in the console.
 The program will run indefinitelly. It can be stoped by pressing Ctrl+C. A summary of the sesion will be displayed in the console before shutting down.
 ## Data Record
-The program keeps a record of each minute's events in a text file called ledger_xxxxxxxxxx.txt, where xxxxxxxxxx is the UNIXepoch at which the session started. Data is stored in the following format:
+The program keeps a record of each minute's events in a text file called log_xxxxxxxxxx.txt, where xxxxxxxxxx is the UNIXepoch at which the session started. Data is stored in the following format:
 ```bash
-[Date and time, priceLow, priceHigh, AwesomeOscilatorValue, AwesomeOscilatorCue, transactionType, lastBuyPrice]
+[Date and time, priceLow, priceHigh, AwesomeOscilatorValue, AwesomeOscilatorCue, transactionType, accountFee]
+```
+A file called ledger_xxxxxxxxxx.txt, where xxxxxxxxxx is the UNIXepoch at which the session started, will keep record of all transactions made. Data is stored in the following format:
+Buy operations:
+```bash
+[Date and time,opperationType, coinbRemaining, qtyBought, buyPrice, feeApplied, transactionCost]
+```
+Sell operations:
+```bash
+[Date and time, opperationType, coinbReturned, qtySold, sellPrice, feeApplied, transactionProfit]
 ```
 
 ## Contributing
