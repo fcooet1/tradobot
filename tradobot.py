@@ -1,8 +1,34 @@
 #!/usr/bin/python
-#fcooet1 APR 2021
+#fcooet1 jun 2021
 
 import requests,json,time,sys,hashlib,hmac,uuid
 
+class Inv:
+	def __init__(self,mkt,qty,bdate,batt,bfee):
+		self.mkt=mkt
+		self.qty=qty
+		self.bdate=bdate
+		self.batt=batt
+		self.bfee=bfee
+		self.bcost=0
+		self.satt=0
+		self.sdate=0
+		self.sfee=0
+		self.profit=0
+	def buy(self):
+		self.bcost=self.qty*self.batt*(1+self.bfee)
+		print("%.8f%s bought at %.2f, %.6f%s fee paid." %(self.qty,self.mkt[:self.mkt.index("-")],self.batt,self.bfee*self.qty*self.batt,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
+		print("Transaction cost was %.5f%s." %(self.bcost,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
+		print()
+	def sell(self):
+		self.profit=self.qty*(self.satt*(1-self.sfee)-self.batt*(1+self.bfee))
+		print("%.8f%s sold at %.2f, %.5f%s fee paid." %(self.qty,self.mkt[:self.mkt.index("-")],self.satt,self.sfee*self.qty*self.satt,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
+		print("Transaction profit was %.5f%s." %(self.profit,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
+		print()
+
+def fnSavetoLog(entry,startdate):
+	with open('log_'+str(startdate)+'.txt','a') as filehandle:
+		filehandle.write('%s\n' %entry)
 def fnSavetoLedger(entry,startdate):
 	with open('ledger_'+str(startdate)+'.txt','a') as filehandle:
 		filehandle.write('%s\n' %entry)
@@ -118,7 +144,7 @@ def fnDetectCue(a):
 			return 1
 	#Nough cross
 	if len(a)>1:
-		if a[-1]>0 and a[-2]>0 and a[-3]<=0 and a[-4]<=0 and a[-5]<=0 and a[-6]<=0 and a[-7]<=0:    
+		if a[-1]>0 and a[-2]>0 and a[-3]<=0 and a[-4]<=0 and a[-5]<=0 and a[-6]<=0 and a[-7]<=0:
 			#NX Cue: Buy
 			return 0
 		if a[-1]<0 and a[-2]>=0:
@@ -126,9 +152,9 @@ def fnDetectCue(a):
 			return 1
 	#Saucers
 	if len(a)>4:
-		#if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2] and a[-4]>a[-3]:###Delete Comments to activate this Cue. Strategy will turn less conservative.
+		#if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2] and a[-4]>a[-3]:
 			#Saucer Cue: Buy
-		#	return 0 
+			#return 0 
 		if a[-1]<0 and a[-2]<0 and a[-3]<0 and a[-1]<a[-2] and a[-3]<a[-2] and a[-4]<a[-3]:
 			#Saucer Cue: Sell
 			return 1
@@ -138,23 +164,20 @@ def fnBuy(m, p):
 	g=m/((1+gfee)*p)
 	answer='<Response [201]>'#fnPlaceOrder('BUY',g,p)  ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
-		print("%s%.6f bought at $%.6f"%(coina,g, p))
-		print("Amount spent on transaction was %s%.6f + a %s%.6f fee." %(coinb,g*p,coinb,g*p*gfee))
 		return g
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
+		print()
 		return 0
 	
 def fnSell(g, p):
 	print('**********************SELL ORDER**********************')
 	answer='<Response [201]>'#fnPlaceOrder('SELL',g,p) ####DELETE '<Response [201]>'# RIGHT TO answer= TO ACTIVATE REAL TRADING####
 	if answer=='<Response [201]>':
-		print("%s%.6f sold at $%.6f"%(coina,g, p))
-		m=g*p*(1-gfee)
-		print("Transaction profit was %s%.6f (%s%.6f fee was paid)." %(coinb,g*(p*(1-gfee)-LP*(1+gfee)),coinb,g*p*gfee))
-		return m
+		return 1
 	else:
 		print("Server returned error %s. Transaction failed."%answer)
+		print()
 		return 0
 def main():
 	try:
@@ -164,21 +187,19 @@ def main():
 		SMA5=[]
 		SMA34=[]
 		AO=[]
-		sessionfees=[]
-		sessionprofit=0.0
+		assets=[]
+		returns=[]
 		
 		global coina
 		global coinb
 		global APIKEY
 		global APISECRET
 		global gfee
-		global LP
+		responce=-1
 		
 		coina='' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 		coinb='' 
-		
-		LP=float(0) #enter here the minimum price at which you want to sell available BTC. If you decide to not use available BTC leave it at 0.
-		
+				
 		APIKEY= ''####YOUR APIKEY HERE####
 		APISECRET= ''####YOUR APISECRET HERE####
 		
@@ -196,28 +217,24 @@ def main():
 			exit()
 		r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 		if str(r)!='<Response [200]>':
-			print("Selected market unavailable. ("+str(rauth)+'). The progream will close.')
+			print("Market doesn't exist. ("+str(rauth)+'). The progream will close.')
 			input()
 			exit()
 		rj=r.json()
-		print('Current market is at %.6f%s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
-		print('Available account balance is:')
+		print('Current market is at %.6f %s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
+		print('Current available balance is:')
 		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
 		if float(fnGetBalance(coina)[-1][1])>0.0:
 			print('Use available %s? Y/N' %coina)
 			auxqstn=''
-			while auxqstn!=('y' and 'Y' and 'n' and 'N'):
+			while auxqstn!=('y') and auxqstn!=('Y') and auxqstn!=('n') and auxqstn!=('N'):
 				auxqstn=str(input())
 				if auxqstn==('y' or 'Y'):
-					coinacash=float(fnGetBalance(coina)[-1][1])
-					maxcoina=0.0
-				if auxqstn==('n' or 'N'):
-					coinacash=0.0
-					maxcoina=float(fnGetBalance(coina)[-1][1])
-		else:
-			coinacash=0.0
-			maxcoina=0.0
+					print('Minimum price to sell your %s' %coina)
+					assets.append(Inv(coina+"-"+coinb,fnGetBalance(coina)[-1][1],int(time.time()),float(input()),0.0075))
+					assets[-1].buy()
+
 		gfee=fnFee()
 		print('At this moment your commision rate is '+str(gfee*100)+"%")
 		
@@ -231,7 +248,6 @@ def main():
 		while auxcash>=float(fnGetBalance(coinb)[-1][1]):
 			print('Insuficient funds.')
 			auxcash=float(input())
-			maxtrad=auxcash
 		coinbcash=auxcash
 		startdate=int(time.time())
 		print()
@@ -255,6 +271,7 @@ def main():
 		print("Transactions will be displayed when made.")
 		print('Press Ctrl+C anytime to stop the bot.')
 		print('A ledger file will be saved containing all session info.')
+		print('Check README to understand ledger data.')
 		print()
 
 		while True:
@@ -267,71 +284,79 @@ def main():
 			AO.append(SMA5[-1]-SMA34[-1])
 			aux=fnDetectCue(AO)
 			opp='none'
-			if (1-stoploss)*LP>=pricelist[-1][1] and coinacash>0 and AO[-1]<0:#STOP-LOSS
-				gfee=fnFee()
-				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
-				auxsell=coinbcash
-				counter=0
-				print('**********************STOP--LOSS**********************')
-				coinbcash=fnSell(coinacash,pricelist[-1][1])
-				while coinbcash==0 and counter<10:
-					opp='SL-failed'
-					coinbcash=auxsell
-					print("Attempting to place order again.[%d]" %(counter+1))
-					coinbcash=fnSell(coinacash,fnGetSTXData()[1])
-					time.sleep(1)
-					counter+=1
-				if coinbcash>0 and counter!=10:
-					sessionfees.append(coinacash*pricelist[-1][1]*gfee)
-					sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
-					LP=0.0
-					opp='SL'
-					coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
-				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
-				print()	
-			if aux==1:#Sell
-				gfee=fnFee()
-				coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
-				if LP/(1-gfee)**2<pricelist[-1][1] and coinacash>0 and LP!=0:
-					auxsell=coinbcash
+
+			for a in assets: #STOP-LOSS
+				if (1-stoploss)*a.batt>=pricelist[-1][1] and a.satt==0 and AO[-1]<0:
+					gfee=fnFee()
 					counter=0
-					coinbcash=fnSell(coinacash,pricelist[-1][1])
-					while coinbcash==0 and counter<10:
-						opp='sell-failed'
-						coinbcash=auxsell
+					print('**********************STOP--LOSS**********************')
+					P=fnGetSTXData()[1]
+					responce=fnSell(a.qty,pricelist[-1][1])
+					while responce==0 and counter<10:
 						print("Attempting to place order again.[%d]" %(counter+1))
-						coinbcash=fnSell(coinacash,fnGetSTXData()[1])
+						P=fnGetSTXData()[1]
+						responce=fnSell(a.qty,P)
 						time.sleep(1)
+						opp='SL-failed'
 						counter+=1
-					if coinbcash>0 and counter!=10:
-						sessionfees.append(coinacash*pricelist[-1][1]*gfee)
-						sessionprofit+=(coinbcash-coinacash*LP-sessionfees[-1])
-						LP=0.0
-						opp='sell'
-						coinbcash=min(maxtrad,float(fnGetBalance(coinb)[-1][1]))
-					coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
-					print()	
-			if aux==0:#Buy
+					if responce>0 and counter!=10:
+						a.satt=P
+						a.sdate=currenttime
+						a.sfee=gfee
+						a.sell()
+						returns.append(a)
+						coinbcash+=a.qty*a.satt*(1-a.sfee)
+						opp='SL'
+						ledgerentry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),opp,coinbcash,assets[-1].qty,assets[-1].satt,assets[-1].sfee,assets[-1].profit]
+						fnSavetoLedger(str(ledgerentry).replace("'","").replace("[","").replace("]",""),startdate)
+					responce=-1					
+			if aux==1:#SELL
 				gfee=fnFee()
-				if coinbcash>0 and pricelist[-1][2]>pricelist[-2][2]:
-					auxbuy=coinacash
-					coinacash=fnBuy(coinbcash,pricelist[-1][2])
-					if coinacash==0:
-						coinacash=auxbuy
-						coinbcash=min(fnGetBalance(coina)[-1][1],maxtrad)
+				for a in assets:
+					if a.batt/((1-a.bfee)*(1-gfee))<pricelist[-1][1] and a.satt==0:
+						counter=0
+						P=fnGetSTXData()[1]
+						responce=fnSell(a.qty,P)
+						while responce==0 and counter<10:
+							print("Attempting to place order again.[%d]" %(counter+1))
+							P=fnGetSTXData()[1]
+							responce=fnSell(a.qty,P)
+							time.sleep(1)
+							opp='sell-failed'
+							counter+=1
+						if responce>0 and counter!=10:
+							a.satt=P
+							a.sdate=currenttime
+							a.sfee=gfee
+							a.sell()
+							returns.append(a)
+							coinbcash+=a.qty*a.satt*(1-a.sfee)
+							opp='sell'
+							ledgerentry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),opp,coinbcash,assets[-1].qty,assets[-1].satt,assets[-1].sfee,assets[-1].profit]
+							fnSavetoLedger(str(ledgerentry).replace("'","").replace("[","").replace("]",""),startdate)
+						responce=-1
+			if aux==0:#BUY
+				gfee=fnFee()
+				if coinbcash>0:
+					coinbcash=min(coinbcash,maxtrad)
+					responce=fnBuy(coinbcash,pricelist[-1][2])
+					if responce==0:
+						coinbcash=min(coinbcash,maxtrad)
 						opp='buy-failed'
-					if coinacash>0 and opp!='buy-failed':
-						sessionfees.append((coinbcash*gfee)/(1+gfee))
-						LP=pricelist[-1][2]
+					if responce>0 and opp!='buy-failed':
+						assets.append(Inv(coina+"-"+coinb,responce,currenttime,pricelist[-1][2],gfee))
+						assets[-1].buy()
 						opp='buy'
-						coinacash=float(fnGetBalance(coina)[-1][1])-maxcoina
 						coinbcash=0.0
-					print()
-			entry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,LP,gfee]
-			fnSavetoLedger(str(entry).replace("'","").replace("[","").replace("]",""),startdate)
+						ledgerentry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),opp,coinbcash,assets[-1].qty,assets[-1].batt,assets[-1].bfee,assets[-1].bcost]
+						fnSavetoLedger(str(ledgerentry).replace("'","").replace("[","").replace("]",""),startdate)
+					responce=-1
+
+			logentry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,gfee]
+			fnSavetoLog(str(logentry).replace("'","").replace("[","").replace("]",""),startdate)
 			
-			if currenttime+60>time.time():
-				time.sleep(currenttime+60-time.time())
+			if currenttime+5>time.time():
+				time.sleep(currenttime+5-time.time())
 			else:
 				r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 				rj=r.json()
@@ -346,18 +371,28 @@ def main():
 						SMA34.append(sum(mid[-34:])/34)
 						AO.append(SMA5[-1]-SMA34[-1])
 					sys.stdout.flush()
+
 				print()
 	except KeyboardInterrupt:
 		print()
 		print('TRADOBOT has stoped')
 		print()
-		print("%d transactions were made and %s%.6f was paid for fees" %(len(sessionfees),coinb, sum(sessionfees)))
-		print("This session's profit was: %s%.8f" %(coinb,sessionprofit))
+		if len(returns)-len(assets)<0:
+			print("Active assets will be listed bellow:")
+		for a in assets:
+			if a.satt!=0:
+				a.buy()
+			prof=0+a.profit
+			fees=0+a.qty*(a.satt*a.sfee+a.batt*a.bfee)
+		print("%d transactions were made and %s%.6f was paid for fees" %(len(assets)+len(returns),coinb,fees))
+		print("This session's profit was: %s%.8f" %(coinb,prof))
 		print()
 		print('End of session available balance is:')
 		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
 		print()
+		ledgerentry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),"end",prof]
+		fnSavetoLedger(str(ledgerentry).replace("'","").replace("[","").replace("]",""),startdate)
 
 if __name__=="__main__":
 	main()
