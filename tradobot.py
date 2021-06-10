@@ -118,17 +118,17 @@ def fnDetectCue(a):
 			return 1
 	#Nough cross
 	if len(a)>1:
-		#if a[-1]>0 and a[-2]<=0:    ###Delete Comments to activate this Cue. Strategy will turn less conservative.
+		if a[-1]>0 and a[-2]>0 and a[-3]<=0 and a[-4]<=0 and a[-5]<=0 and a[-6]<=0 and a[-7]<=0:    
 			#NX Cue: Buy
-			#return 0
+			return 0
 		if a[-1]<0 and a[-2]>=0:
 			#NX Cue: Sell
 			return 1
 	#Saucers
 	if len(a)>4:
-		if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2] and a[-4]>a[-3]:
+		#if a[-1]>0 and a[-2]>0 and a[-3]>0 and a[-1]>a[-2] and a[-3]>a[-2] and a[-4]>a[-3]:###Delete Comments to activate this Cue. Strategy will turn less conservative.
 			#Saucer Cue: Buy
-			return 0 
+		#	return 0 
 		if a[-1]<0 and a[-2]<0 and a[-3]<0 and a[-1]<a[-2] and a[-3]<a[-2] and a[-4]<a[-3]:
 			#Saucer Cue: Sell
 			return 1
@@ -231,6 +231,7 @@ def main():
 		while auxcash>=float(fnGetBalance(coinb)[-1][1]):
 			print('Insuficient funds.')
 			auxcash=float(input())
+			maxtrad=auxcash
 		coinbcash=auxcash
 		startdate=int(time.time())
 		print()
@@ -312,7 +313,7 @@ def main():
 					print()	
 			if aux==0:#Buy
 				gfee=fnFee()
-				if coinbcash>0:
+				if coinbcash>0 and pricelist[-1][2]>pricelist[-2][2]:
 					auxbuy=coinacash
 					coinacash=fnBuy(coinbcash,pricelist[-1][2])
 					if coinacash==0:
