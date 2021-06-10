@@ -204,7 +204,7 @@ def main():
 		APISECRET= ''####YOUR APISECRET HERE####
 		
 		print()
-		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1.')
+		print('TRADOBOT v0.2 - Automatic trading on Bittrex Market by fcooet1.')
 		print('This bot uses Bill Williams Momentum strategy to trade automatically.')
 		print()
 		if APIKEY=='' or APISECRET=='':
