@@ -355,8 +355,8 @@ def main():
 			logentry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),pricelist[-1][1],pricelist[-1][2],AO[-1],aux,opp,gfee]
 			fnSavetoLog(str(logentry).replace("'","").replace("[","").replace("]",""),startdate)
 			
-			if currenttime+5>time.time():
-				time.sleep(currenttime+5-time.time())
+			if currenttime+60>time.time():
+				time.sleep(currenttime+60-time.time())
 			else:
 				r=requests.get('https://api.bittrex.com/v3/markets/'+coina+'-'+coinb+'/candles/TRADE/MINUTE_1/recent')
 				rj=r.json()
