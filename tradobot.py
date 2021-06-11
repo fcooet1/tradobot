@@ -355,7 +355,7 @@ def main():
 		print('TRADOBOT has stoped')
 		print()
 		if len(returns)-len(assets)<0:
-			print("Active assets will be listed bellow:")
+			print("Active assets will be listed below:")
 		for a in assets:
 			if a.satt!=0:
 				a.buy()
