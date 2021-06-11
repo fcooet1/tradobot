@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #fcooet1 jun 2021
 
-import requests,json,time,sys,hashlib,hmac,uuid
+import requests,json,time,sys,hashlib,hmac
 
 class Inv:
 	def __init__(self,mkt,qty,bdate,batt,bfee):
@@ -29,34 +29,10 @@ class Inv:
 def fnSavetoLog(entry,startdate):
 	with open('log_'+str(startdate)+'.txt','a') as filehandle:
 		filehandle.write('%s\n' %entry)
+
 def fnSavetoLedger(entry,startdate):
 	with open('ledger_'+str(startdate)+'.txt','a') as filehandle:
-		filehandle.write('%s\n' %entry)
-
-def fnGetLastOrder(id):
-	URL = 'https://api.bittrex.com/v3/orders/closed'
-	method='GET'
-	timestamp = str(int(time.time()*1000))
-	requestbody = ''
-	ach = hashlib.sha512(requestbody.encode()).hexdigest()
-	presignature=timestamp+URL+method+ach
-	signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
-	rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
-	if str(rauth)!='<Response [200]>':
-		print('Authentication failed.'+str(rauth)+' The progream will close.')
-		input()
-		exit()
-	while str(rauth.json()[0]['clientOrderId'])!=id:
-		sleep(1)
-		timestamp = str(int(time.time()*1000))
-		presignature=timestamp+URL+method+ach
-		signature=hmac.new(APISECRET.encode(),presignature.encode(),digestmod=hashlib.sha512).hexdigest()
-		rauth=requests.get(URL,headers={'Api-Key': str(APIKEY), 'Api-Timestamp': timestamp, 'Api-Content-Hash': ach, 'Api-Signature': signature})
-		if str(rauth)!='<Response [200]>':
-			print('Authentication failed while getting order info ('+str(rauth)+'). The progream will close.')
-			input()
-			exit()
-	return [float(rauth.json()[0]['proceeds']),float(rauth.json()[0]['commission']),float(rauth.json()[0]['fillQuantity'])]		
+		filehandle.write('%s\n' %entry)	
 		
 def fnGetBalance(a):
 	sym=str(a)
@@ -196,12 +172,16 @@ def main():
 		global APISECRET
 		global gfee
 		responce=-1
+		prof=0
+		fees=0
 		
 		coina='' ####CHANGE coina AND coinb VALUES TO SELECT DESIRED MARKET.
 		coinb='' 
 				
 		APIKEY= ''####YOUR APIKEY HERE####
 		APISECRET= ''####YOUR APISECRET HERE####
+		
+		stoploss = 0.15 ####SET STOP LOSS HERE####
 		
 		print()
 		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1.')
@@ -237,10 +217,7 @@ def main():
 
 		gfee=fnFee()
 		print('At this moment your commision rate is '+str(gfee*100)+"%")
-		
-		stoploss = 0.15
-		print("A stop-loss is set at "+str(stoploss*100)+"% of buy price.")
-		      
+		print("A stop-loss is set at "+str(stoploss*100)+"% of buy price.")      
 		print('Input maximum %s amount to take from your account when trading.' %coinb)
 		maxtrad=float(input())
 		print('Input %s amount to start trading with.' %coinb)
@@ -277,7 +254,7 @@ def main():
 		while True:
 			currenttime=time.time()
 			pricelist.append(fnGetSTXData())
-			print(str(pricelist[-1]))
+			print(str(time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))))+" "+str(pricelist[-1][1])+" "+str(pricelist[-1][2]))
 			mid.append((pricelist[-1][2]+pricelist[-1][1])/2)
 			SMA5.append(sum(mid[-5:])/5)
 			SMA34.append(sum(mid[-34:])/34)
@@ -382,8 +359,8 @@ def main():
 		for a in assets:
 			if a.satt!=0:
 				a.buy()
-			prof=0+a.profit
-			fees=0+a.qty*(a.satt*a.sfee+a.batt*a.bfee)
+			prof+=a.profit
+			fees+=a.qty*(a.satt*a.sfee+a.batt*a.bfee)
 		print("%d transactions were made and %s%.6f was paid for fees" %(len(assets)+len(returns),coinb,fees))
 		print("This session's profit was: %s%.8f" %(coinb,prof))
 		print()
