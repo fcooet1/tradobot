@@ -17,13 +17,13 @@ class Inv:
 		self.profit=0
 	def buy(self):
 		self.bcost=self.qty*self.batt*(1+self.bfee)
-		print("%.8f%s bought at %.2f, %.6f%s fee paid." %(self.qty,self.mkt[:self.mkt.index("-")],self.batt,self.bfee*self.qty*self.batt,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
-		print("Transaction cost was %.5f%s." %(self.bcost,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
+		print("%.8f%s bought at %.6f, %.2f%s fee paid." %(self.qty,self.mkt[:self.mkt.index("-")],self.batt,self.bfee*self.qty*self.batt,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
+		print("Transaction cost was %.2f%s." %(self.bcost,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
 		print()
 	def sell(self):
 		self.profit=self.qty*(self.satt*(1-self.sfee)-self.batt*(1+self.bfee))
-		print("%.8f%s sold at %.2f, %.5f%s fee paid." %(self.qty,self.mkt[:self.mkt.index("-")],self.satt,self.sfee*self.qty*self.satt,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
-		print("Transaction profit was %.5f%s." %(self.profit,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
+		print("%.8f%s sold at %.6f, %.2f%s fee paid." %(self.qty,self.mkt[:self.mkt.index("-")],self.satt,self.sfee*self.qty*self.satt,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
+		print("Transaction profit was %.2f%s." %(self.profit,self.mkt[-(len(self.mkt)-self.mkt.index("-"))+1:]))
 		print()
 
 def fnSavetoLog(entry,startdate):
@@ -254,7 +254,7 @@ def main():
 		while True:
 			currenttime=time.time()
 			pricelist.append(fnGetSTXData())
-			print(str(time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))))+" "+str(pricelist[-1][1])+" "+str(pricelist[-1][2]))
+			print(str(time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))))+"   l:"+str(pricelist[-1][1])+"   h:"+str(pricelist[-1][2]))
 			mid.append((pricelist[-1][2]+pricelist[-1][1])/2)
 			SMA5.append(sum(mid[-5:])/5)
 			SMA34.append(sum(mid[-34:])/34)
@@ -361,8 +361,8 @@ def main():
 				a.buy()
 			prof+=a.profit
 			fees+=a.qty*(a.satt*a.sfee+a.batt*a.bfee)
-		print("%d transactions were made and %s%.6f was paid for fees" %(len(assets)+len(returns),coinb,fees))
-		print("This session's profit was: %s%.8f" %(coinb,prof))
+		print("%d transactions were made and %s%.2f was paid for fees" %(len(assets)+len(returns),coinb,fees))
+		print("This session's profit was: %s%.6f" %(coinb,prof))
 		print()
 		print('End of session available balance is:')
 		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
