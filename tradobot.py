@@ -254,7 +254,7 @@ def main():
 		while True:
 			currenttime=time.time()
 			pricelist.append(fnGetSTXData())
-			print(str(time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))))+"   l:"+str(pricelist[-1][1])+"   h:"+str(pricelist[-1][2]))
+			print(str(time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))))+"   L:"+str(pricelist[-1][1])+"   H:"+str(pricelist[-1][2]))
 			mid.append((pricelist[-1][2]+pricelist[-1][1])/2)
 			SMA5.append(sum(mid[-5:])/5)
 			SMA34.append(sum(mid[-34:])/34)
