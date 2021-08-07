@@ -184,7 +184,7 @@ def main():
 		stoploss = 0.15 ####SET STOP LOSS HERE####
 		
 		print()
-		print('TRADOBOT v0.1 - Automatic trading on Bittrex Market by fcooet1.')
+		print('TRADOBOT v0.3 - Automatic trading on Bittrex Market by fcooet1.')
 		print('This bot uses Bill Williams Momentum strategy to trade automatically.')
 		print()
 		if APIKEY=='' or APISECRET=='':
