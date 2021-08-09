@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #fcooet1 jun 2021
 
-import requests,json,time,sys,hashlib,hmac
+import requests,json,time,sys,hashlib,hmac,os
 
 class Inv:
 	def __init__(self,mkt,qty,bdate,batt,bfee):
@@ -183,6 +183,7 @@ def main():
 		
 		stoploss = 0.15 ####SET STOP LOSS HERE####
 		
+		os.system("mode con: cols=72 lines=60")
 		print()
 		print('TRADOBOT v0.3 - Automatic trading on Bittrex Market by fcooet1.')
 		print('This bot uses Bill Williams Momentum strategy to trade automatically.')
