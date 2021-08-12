@@ -27,11 +27,11 @@ class Inv:
 		print()
 
 def fnSavetoLog(entry,startdate):
-	with open(coina+'-'+coinb'log_'+str(startdate)+'.txt','a') as filehandle:
+	with open(coina+'-'+coinb+'log_'+str(startdate)+'.txt','a') as filehandle:
 		filehandle.write('%s\n' %entry)
 
 def fnSavetoLedger(entry,startdate):
-	with open(coina+'-'+coinb'ledger_'+str(startdate)+'.txt','a') as filehandle:
+	with open(coina+'-'+coinb+'ledger_'+str(startdate)+'.txt','a') as filehandle:
 		filehandle.write('%s\n' %entry)	
 		
 def fnGetBalance(a):
