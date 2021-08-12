@@ -371,6 +371,7 @@ def main():
 		print()
 		ledgerentry=[time.strftime('%d/%m/%y %H:%M',time.localtime(int(currenttime))),"end",prof]
 		fnSavetoLedger(str(ledgerentry).replace("'","").replace("[","").replace("]",""),startdate)
+		input()
 
 if __name__=="__main__":
 	main()
