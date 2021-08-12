@@ -202,7 +202,7 @@ def main():
 			input()
 			exit()
 		rj=r.json()
-		print('Current market is at %.6f %s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
+		print('Current market is at %.6f%s for 1%s.' %(float(rj[-1]['high']),coinb,coina))
 		print('Current available balance is:')
 		print('%s%.6f'%(coinb,float(fnGetBalance(coinb)[-1][1])))
 		print('%s%.6f'%(coina,float(fnGetBalance(coina)[-1][1])))
